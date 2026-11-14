@@ -5,7 +5,7 @@ description: スマホアプリに新しい画面を追加するときの手順�
 
 # 新しい画面を追加する手順
 
-> 技術スタックは Expo（React Native）＋ TypeScript ＋ Expo Router。ファイルの置き場所は CLAUDE.md の「フォルダ構成」に従う（子ども用は `app/(child)/`、保護者用は `app/(parent)/`）。
+> 技術スタックは Expo（React Native）＋ TypeScript ＋ Expo Router。ファイルの置き場所は CLAUDE.md の「フォルダ構成」に従う（子ども用は `src/app/(child)/`、保護者用は `src/app/(parent)/`）。
 
 1. **目的を1つに絞る**
    - この画面で子ども（または保護者）が「何を1つする」画面かを一文で書き、ユーザーに確認する
