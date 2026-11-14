@@ -78,22 +78,22 @@
 ### フォルダ構成
 ```
 src/
-  app/            画面（Expo Router）※いまはテンプレートのサンプル画面
-    (child)/      子ども用の画面（予定）
+  app/            画面（Expo Router）
+    (child)/      子ども用の画面（index.tsx = きょうの やること）
     (parent)/     保護者用の画面（予定）
-  components/     ボタン・カードなどの部品
-  constants/      色などのテーマ
-  hooks/          共通の処理
-  storage/        端末内保存の処理（予定）
+  components/     ボタン・カード・モーダルなどの部品
+  constants/      色・文字の大きさ・タップ領域などのテーマ
+  hooks/          共通の処理（use-study-data: 保存データの読み書きと今日の日付）
+  storage/        端末内保存（AsyncStorage。キー studyplan/app-data に AppData を JSON で保存）
   planner/        計画の組み立て・組み直しの処理（画面から独立させてテストする）
-  strings/        表示する文言（いまは教科名のみ）
+  strings/        表示する文言（教科名、きょうの やること画面）
   types/          型定義
 assets/           アイコン・画像
-scripts/          テンプレート付属のスクリプト（reset-project.js）
 ```
 
 ### 現状の注意点
-- テンプレートのサンプル画面（web 用ファイル）で `tsc` の型エラーが3件出る。最初の画面を作るときにサンプルごと置き換える
+- テンプレートのサンプル画面は削除済み。`src/hooks/use-color-scheme.web.ts`（ブラウザ版専用）にリントの指摘が1件残っている
+- 保存データが読めない（壊れている）ときは、初期データで作り直してしまう。保護者モードを作るときに扱いを見直す
 - `npm audit` で moderate の指摘が3件（開発ツールの依存 minimatch）。`npm audit fix --force` は破壊的変更を含むため実行しない
 
 ## ルールとスキルの置き場所

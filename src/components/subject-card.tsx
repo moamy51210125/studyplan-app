@@ -1,0 +1,83 @@
+import { StyleSheet, Text, View } from 'react-native';
+
+import { BigButton } from '@/components/big-button';
+import { FontSize, Spacing } from '@/constants/theme';
+import { useTheme } from '@/hooks/use-theme';
+import { TODAY_TEXT } from '@/strings/today';
+
+interface SubjectCardProps {
+  label: string;
+  done: boolean;
+  /** 未完了のときに「できた！」を押したとき（無ければボタンを出さない） */
+  onDone?: () => void;
+  onUndo: () => void;
+}
+
+/** 教科1つ分のカード。できたかどうかは色だけでなく文字と ✓ でも示す */
+export function SubjectCard({ label, done, onDone, onUndo }: SubjectCardProps) {
+  const theme = useTheme();
+  return (
+    <View
+      style={[
+        styles.card,
+        {
+          backgroundColor: done ? theme.successBackground : theme.backgroundElement,
+          borderColor: done ? theme.success : theme.border,
+        },
+      ]}>
+      <Text
+        style={[styles.label, { color: theme.text }]}
+        accessibilityLabel={done ? TODAY_TEXT.a11yDoneState(label) : label}>
+        {label}
+      </Text>
+
+      {done ? (
+        <View style={styles.doneRow}>
+          <Text style={[styles.badge, { color: theme.success }]}>✓ {TODAY_TEXT.doneBadge}</Text>
+          <BigButton
+            variant="quiet"
+            label={TODAY_TEXT.undo}
+            accessibilityLabel={TODAY_TEXT.a11yUndo(label)}
+            onPress={onUndo}
+          />
+        </View>
+      ) : (
+        onDone && (
+          <BigButton
+            label={TODAY_TEXT.doneButton}
+            accessibilityLabel={TODAY_TEXT.a11yDone(label)}
+            onPress={onDone}
+          />
+        )
+      )}
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  card: {
+    borderWidth: 2,
+    borderRadius: 20,
+    padding: Spacing.three,
+    gap: Spacing.three,
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  label: {
+    fontSize: FontSize.heading,
+    fontWeight: '700',
+    flexShrink: 1,
+  },
+  doneRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    alignItems: 'center',
+    gap: Spacing.two,
+  },
+  badge: {
+    fontSize: FontSize.button,
+    fontWeight: '700',
+  },
+});

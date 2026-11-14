@@ -1,26 +1,36 @@
 /**
- * Below are the colors that are used in the app. The colors are defined in the light and dark mode.
- * There are many other ways to style your app. For example, [Nativewind](https://www.nativewind.dev/), [Tamagui](https://tamagui.dev/), [unistyles](https://unistyl.es/), etc.
+ * アプリの色・文字・すき間。ライトとダークの両方を用意する。
+ * 文字と背景のコントラストは WCAG AA 以上にする（.claude/rules/kid-friendly-ui.md）。
  */
-
-import '@/global.css';
 
 import { Platform } from 'react-native';
 
 export const Colors = {
   light: {
-    text: '#000000',
-    background: '#ffffff',
-    backgroundElement: '#F0F0F3',
-    backgroundSelected: '#E0E1E6',
-    textSecondary: '#60646C',
+    text: '#1A1A1A',
+    textSecondary: '#55595F',
+    background: '#FFFFFF',
+    backgroundElement: '#F2F4F7',
+    backgroundSelected: '#E0E4EA',
+    border: '#C9CED6',
+    /** 主なボタンの色と、その上の文字色 */
+    tint: '#1F6FD1',
+    onTint: '#FFFFFF',
+    /** 「できた！」の色 */
+    success: '#146C3C',
+    successBackground: '#E3F5EA',
   },
   dark: {
-    text: '#ffffff',
-    background: '#000000',
-    backgroundElement: '#212225',
-    backgroundSelected: '#2E3135',
+    text: '#F5F5F5',
     textSecondary: '#B0B4BA',
+    background: '#000000',
+    backgroundElement: '#1C1D20',
+    backgroundSelected: '#2E3135',
+    border: '#44474D',
+    tint: '#6AB0FF',
+    onTint: '#0B1B2E',
+    success: '#7EE2A8',
+    successBackground: '#123524',
   },
 } as const;
 
@@ -28,13 +38,9 @@ export type ThemeColor = keyof typeof Colors.light & keyof typeof Colors.dark;
 
 export const Fonts = Platform.select({
   ios: {
-    /** iOS `UIFontDescriptorSystemDesignDefault` */
     sans: 'system-ui',
-    /** iOS `UIFontDescriptorSystemDesignSerif` */
     serif: 'ui-serif',
-    /** iOS `UIFontDescriptorSystemDesignRounded` */
     rounded: 'ui-rounded',
-    /** iOS `UIFontDescriptorSystemDesignMonospaced` */
     mono: 'ui-monospace',
   },
   default: {
@@ -43,13 +49,18 @@ export const Fonts = Platform.select({
     rounded: 'normal',
     mono: 'monospace',
   },
-  web: {
-    sans: 'var(--font-display)',
-    serif: 'var(--font-serif)',
-    rounded: 'var(--font-rounded)',
-    mono: 'var(--font-mono)',
-  },
 });
+
+/** 小学生向けの文字の大きさ（本文 16 以上、ボタン 18 以上） */
+export const FontSize = {
+  body: 18,
+  button: 20,
+  heading: 24,
+  title: 30,
+} as const;
+
+/** タップできる部品の最低の高さ（iOS 44pt / Android 48dp より大きめ） */
+export const MinTouchSize = 56;
 
 export const Spacing = {
   half: 2,
@@ -61,5 +72,4 @@ export const Spacing = {
   six: 64,
 } as const;
 
-export const BottomTabInset = Platform.select({ ios: 50, android: 80 }) ?? 0;
 export const MaxContentWidth = 800;
