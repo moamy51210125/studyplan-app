@@ -1,5 +1,6 @@
 import { getDocumentAsync } from 'expo-document-picker';
 import { File, Paths } from 'expo-file-system';
+import { readAsStringAsync } from 'expo-file-system/legacy';
 import { isAvailableAsync, shareAsync } from 'expo-sharing';
 import { useState } from 'react';
 import { Alert, StyleSheet, Text, View } from 'react-native';
@@ -18,6 +19,28 @@ interface Props {
   data: AppData;
   today: DateKey;
   commit: (next: AppData) => void;
+}
+
+function errorText(e: unknown): string {
+  return e instanceof Error ? e.message : String(e);
+}
+
+/**
+ * 選んだファイルの中身を読む。
+ * Android では、ファイルの場所（URI）に空白やカッコが変換されて入っていたり、
+ * content:// の形だったりするため、それにも対応した readAsStringAsync を先に使い、
+ * だめなら新しい File の読み方でもう一度ためす。
+ */
+async function readPickedFile(uri: string): Promise<string> {
+  try {
+    return await readAsStringAsync(uri);
+  } catch (first) {
+    try {
+      return await new File(uri).text();
+    } catch (second) {
+      throw new Error(`${errorText(first)} / ${errorText(second)}`);
+    }
+  }
 }
 
 /**
@@ -47,20 +70,18 @@ export function BackupSection({ data, today, commit }: Props) {
         dialogTitle: PARENT_TEXT.backupShareTitle,
       });
       commit({ ...data, lastBackupDate: today });
-    } catch {
-      setMessage(PARENT_TEXT.backupExportFailed);
+    } catch (e) {
+      setMessage(`${PARENT_TEXT.backupExportFailed}\n${PARENT_TEXT.errorDetail(errorText(e))}`);
     }
   };
 
   const importBackup = async () => {
     setMessage('');
     try {
-      const picked = await getDocumentAsync({
-        type: ['application/json', 'text/plain', '*/*'],
-        copyToCacheDirectory: true,
-      });
+      // 保存先によっては JSON と判定されないことがあるので、すべてのファイルを選べるようにする
+      const picked = await getDocumentAsync({ type: '*/*', copyToCacheDirectory: true });
       if (picked.canceled) return;
-      const content = await new File(picked.assets[0].uri).text();
+      const content = await readPickedFile(picked.assets[0].uri);
       const result = parseBackupText(content);
       if (!result.ok) {
         setMessage(result.reason === 'newer-version' ? PARENT_TEXT.backupNewer : PARENT_TEXT.backupNotBackup);
@@ -84,8 +105,9 @@ export function BackupSection({ data, today, commit }: Props) {
           },
         ],
       );
-    } catch {
-      setMessage(PARENT_TEXT.backupImportFailed);
+    } catch (e) {
+      // 原因が分かるように、エラーの内容も出す（保護者画面のみ）
+      setMessage(`${PARENT_TEXT.backupImportFailed}\n${PARENT_TEXT.errorDetail(errorText(e))}`);
     }
   };
 

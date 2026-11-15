@@ -24,6 +24,11 @@ describe('バックアップ', () => {
     expect(r).toEqual({ ok: true, data, exportedAt: '2027-02-03' });
   });
 
+  test('先頭に BOM や空白が付いていても読み込める', () => {
+    const r = parseBackupText(`﻿  ${createBackupText(data, '2027-02-03')}\n`);
+    expect(r.ok).toBe(true);
+  });
+
   test('ファイル名に日付が入る', () => {
     expect(backupFileName('2027-02-03')).toBe('studyplan-backup-2027-02-03.json');
   });

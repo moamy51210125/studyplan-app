@@ -120,6 +120,7 @@ export const PARENT_TEXT = {
   backupNotBackup: 'このファイルは、このアプリのバックアップではないか、こわれています。',
   backupNewer: 'このファイルは新しいバージョンのアプリで作られたため、読み込めません。アプリを最新にしてからお試しください。',
   backupRestored: 'データを読み込みました。',
+  errorDetail: (detail: string) => `（くわしい内容：${detail}）`,
 
   appearanceTitle: '画面の色',
   appearanceNote: '「スマホに合わせる」にすると、スマホのダークモードの設定に合わせて切り替わります。',

@@ -33,7 +33,8 @@ export type ParseBackupResult =
 export function parseBackupText(text: string): ParseBackupResult {
   let raw: unknown;
   try {
-    raw = JSON.parse(text);
+    // 保存先のアプリによっては、先頭に BOM（見えない印）や空白が付くことがあるので取りのぞく
+    raw = JSON.parse(text.replace(/^﻿/, '').trim());
   } catch {
     return { ok: false, reason: 'broken' };
   }
