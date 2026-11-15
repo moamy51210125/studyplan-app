@@ -4,6 +4,7 @@ import { ScrollView, StyleSheet, Switch, Text, TextInput, View } from 'react-nat
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { BigButton } from '@/components/big-button';
+import { AmountSection } from '@/components/parent/amount-section';
 import { AppearanceSection } from '@/components/parent/appearance-section';
 import { ExamsSection } from '@/components/parent/exams-section';
 import { GradeSection } from '@/components/parent/grade-section';
@@ -142,6 +143,8 @@ export default function ParentScreen() {
             <BigButton variant="secondary" label={PARENT_TEXT.addSubject} onPress={addSubject} />
           </View>
         </Section>
+
+        <AmountSection settings={data.settings} onChange={updateSettings} />
 
         <Section title={PARENT_TEXT.slotsTitle} note={PARENT_TEXT.slotsNote}>
           <SlotsEditor

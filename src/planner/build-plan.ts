@@ -1,14 +1,7 @@
-import type {
-  DateKey,
-  Exam,
-  PlannedSlot,
-  PlanSettings,
-  SubjectCounts,
-  SubjectId,
-} from '@/types/plan';
+import type { DateKey, PlannedSlot, PlanSettings, SubjectCounts, SubjectId } from '@/types/plan';
 import { eachDay, monthRange, weekdayOf } from './dates';
 import { subjectWeight } from './exam-weight';
-import { enabledSubjectIds } from './subjects';
+import { AMOUNT_WEIGHT, enabledSubjectIds } from './subjects';
 
 export interface BuildPlanInput {
   settings: PlanSettings;
@@ -26,6 +19,7 @@ const EPSILON = 1e-9;
  * 偏りのない計画を作る。
  *
  * 枠を日付順に1つずつ埋め、そのたびに「回数 ÷ 重み」がいちばん小さい教科を選ぶ。
+ * - 重み ＝ 教科ごとの量（少なめ・ふつう・多め）× 試験前の重み
  * - 同じ日に同じ教科は入れない（教科数が1日の枠数より少ないときだけ重なる）
  * - 回数が同じなら、前の日にやっていない教科を優先する
  * - それでも同じなら、教科一覧の順番で決める（毎回同じ結果になる）
@@ -38,6 +32,12 @@ export function buildPlan(input: BuildPlanInput): PlannedSlot[] {
   const counts: SubjectCounts = { ...input.initialCounts };
   for (const id of subjects) counts[id] ??= 0;
 
+  const amountOf = new Map(
+    settings.subjects.map((s) => [s.id, AMOUNT_WEIGHT[s.amount ?? 'normal']]),
+  );
+  const weightOf = (id: SubjectId, date: DateKey) =>
+    (amountOf.get(id) ?? 1) * subjectWeight(id, date, settings.exams);
+
   const restDays = new Set(settings.restDays);
   let yesterday = new Set<SubjectId>(input.previousDaySubjects ?? []);
   const plan: PlannedSlot[] = [];
@@ -47,7 +47,7 @@ export function buildPlan(input: BuildPlanInput): PlannedSlot[] {
     const today = new Set<SubjectId>();
 
     for (let order = 0; order < slots; order++) {
-      const subjectId = pickSubject(subjects, counts, today, yesterday, date, settings.exams);
+      const subjectId = pickSubject(subjects, counts, today, yesterday, (id) => weightOf(id, date));
       plan.push({ date, order, subjectId });
       counts[subjectId] += 1;
       today.add(subjectId);
@@ -62,8 +62,7 @@ function pickSubject(
   counts: SubjectCounts,
   today: ReadonlySet<SubjectId>,
   yesterday: ReadonlySet<SubjectId>,
-  date: DateKey,
-  exams: readonly Exam[],
+  weightOf: (id: SubjectId) => number,
 ): SubjectId {
   const notToday = subjects.filter((id) => !today.has(id));
   const candidates = notToday.length > 0 ? notToday : subjects;
@@ -72,7 +71,7 @@ function pickSubject(
   let bestScore = Infinity;
   let bestDidYesterday = true;
   for (const id of candidates) {
-    const score = counts[id] / subjectWeight(id, date, exams);
+    const score = counts[id] / weightOf(id);
     const didYesterday = yesterday.has(id);
     const better =
       score < bestScore - EPSILON ||

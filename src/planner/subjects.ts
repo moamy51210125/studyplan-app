@@ -1,4 +1,23 @@
-import type { Subject, SubjectId } from '@/types/plan';
+import type { Subject, SubjectAmount, SubjectId } from '@/types/plan';
+
+/**
+ * 教科ごとの量の重み（ユーザー決定 2026-11-15）。
+ * 少なめ＝ふつうの半分、多め＝ふつうの1.5倍の割合で計画に入る。
+ */
+export const AMOUNT_WEIGHT: Record<SubjectAmount, number> = {
+  less: 0.5,
+  normal: 1,
+  more: 1.5,
+};
+
+/** 教科の量を変えた新しい一覧を返す */
+export function setSubjectAmount(
+  subjects: readonly Subject[],
+  id: SubjectId,
+  amount: SubjectAmount,
+): Subject[] {
+  return subjects.map((s) => (s.id === id ? { ...s, amount } : s));
+}
 
 /** 教科のオン・オフを切り替えた新しい一覧を返す */
 export function setSubjectEnabled(

@@ -41,6 +41,14 @@ export const PARENT_TEXT = {
   addSubjectPlaceholder: '例：読書、音読',
   addSubject: '追加',
 
+  amountTitle: '教科ごとの量',
+  amountNote:
+    '多めにしたい教科、少なめにしたい教科を選べます。少なめ＝ふつうの半分、多め＝ふつうの1.5倍くらいの割合で計画に入ります。変えると、明日以降の予定を作り直します。',
+  amountLess: '少なめ',
+  amountNormal: 'ふつう',
+  amountMore: '多め',
+  amountA11y: (subject: string, amount: string) => `${subject}を${amount}にする`,
+
   slotsTitle: '曜日ごとの回数',
   slotsNote: '1日にいくつの教科を勉強するかです。変えると、明日以降の予定を作り直します。',
   slotsValue: (n: number) => `${n}回`,

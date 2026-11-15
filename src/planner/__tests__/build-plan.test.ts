@@ -3,7 +3,7 @@ import type { PlannedSlot, PlanSettings, SlotsPerWeekday } from '@/types/plan';
 import { buildMonthPlan, buildPlan, countBySubject, slotsInRange } from '../build-plan';
 import { createDefaultSettings } from '../defaults';
 import { addDays, eachDay } from '../dates';
-import { addCustomSubject, setSubjectEnabled } from '../subjects';
+import { addCustomSubject, setSubjectAmount, setSubjectEnabled } from '../subjects';
 
 const EVERY_DAY_2: SlotsPerWeekday = { 0: 2, 1: 2, 2: 2, 3: 2, 4: 2, 5: 2, 6: 2 };
 
@@ -117,6 +117,38 @@ describe('buildPlan: 設定の反映', () => {
     settings.subjects = settings.subjects.map((s) => ({ ...s, enabled: s.id === 'sansu' }));
     const plan = buildPlan({ settings, from: '2027-02-01', to: '2027-02-01' });
     expect(plan.map((s) => s.subjectId)).toEqual(['sansu', 'sansu']);
+  });
+});
+
+describe('buildPlan: 教科ごとの量', () => {
+  const FIVE = ['sansu', 'kokugo', 'rika', 'shakai', 'eigo'];
+  function fiveSubjects(): PlanSettings {
+    return { ...createDefaultSettings(), slotsPerWeekday: EVERY_DAY_2 };
+  }
+
+  test('「多め」の教科は、ふつうの約1.5倍入り、ほかは偏らない', () => {
+    const settings = fiveSubjects();
+    settings.subjects = setSubjectAmount(settings.subjects, 'sansu', 'more');
+    const counts = countBySubject(buildMonthPlan(settings, 2027, 2)); // 56枠
+    // 1.5 : 1 : 1 : 1 : 1 → 算数 約15、ほか 約10
+    expect(counts.sansu).toBeGreaterThanOrEqual(14);
+    expect(counts.sansu).toBeLessThanOrEqual(16);
+    expect(spread(buildMonthPlan(settings, 2027, 2), FIVE.slice(1))).toBeLessThanOrEqual(1);
+  });
+
+  test('「少なめ」の教科は、ふつうの約半分', () => {
+    const settings = fiveSubjects();
+    settings.subjects = setSubjectAmount(settings.subjects, 'shakai', 'less');
+    const counts = countBySubject(buildMonthPlan(settings, 2027, 2));
+    // 0.5 : 1 : 1 : 1 : 1 → 社会 約6、ほか 約12
+    expect(counts.shakai).toBeGreaterThanOrEqual(5);
+    expect(counts.shakai).toBeLessThanOrEqual(7);
+    expect(counts.sansu).toBeGreaterThan(counts.shakai * 1.5);
+  });
+
+  test('量を決めていなければ、今までどおり同じ回数', () => {
+    const counts = countBySubject(buildMonthPlan(fiveSubjects(), 2027, 2));
+    expect(FIVE.map((id) => counts[id]).sort()).toEqual([11, 11, 11, 11, 12]);
   });
 });
 

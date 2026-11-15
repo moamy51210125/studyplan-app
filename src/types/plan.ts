@@ -7,11 +7,16 @@ export type SubjectId = string;
 /** core: 学校の教科 / exam: 検定対策 / custom: 自分で追加した教科 */
 export type SubjectKind = 'core' | 'exam' | 'custom';
 
+/** 教科ごとの量（less: 少なめ / normal: ふつう / more: 多め） */
+export type SubjectAmount = 'less' | 'normal' | 'more';
+
 export interface Subject {
   id: SubjectId;
   kind: SubjectKind;
   /** 計画に入れるかどうか */
   enabled: boolean;
+  /** 量（未設定はふつう） */
+  amount?: SubjectAmount;
   /** 自由に追加した教科の表示名（core / exam は文言ファイルから表示する） */
   label?: string;
 }
