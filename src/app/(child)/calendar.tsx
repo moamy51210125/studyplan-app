@@ -4,6 +4,7 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { BigButton } from '@/components/big-button';
+import { RubyText } from '@/components/ruby-text';
 import { FontSize, MaxContentWidth, Spacing } from '@/constants/theme';
 import { useStudyData } from '@/hooks/use-study-data';
 import { useTheme } from '@/hooks/use-theme';
@@ -18,6 +19,7 @@ import {
   weekdayOf,
   weekRangeOf,
 } from '@/planner';
+import { kanaOnly } from '@/strings/ruby';
 import { subjectLabelForChild } from '@/strings/subjects';
 import type { DateKey, SubjectId } from '@/types/plan';
 
@@ -66,9 +68,9 @@ export default function CalendarScreen() {
   return (
     <SafeAreaView style={[styles.safeArea, { backgroundColor: theme.background }]}>
       <ScrollView contentContainerStyle={styles.content}>
-        <Text accessibilityRole="header" style={[styles.title, text]}>
+        <RubyText accessibilityRole="header" style={[styles.title, text]}>
           {t.calendarTitle}
-        </Text>
+        </RubyText>
 
         <View style={styles.row}>
           {(['week', 'month'] as const).map((k) => (
@@ -96,12 +98,12 @@ export default function CalendarScreen() {
             onPress={() => (mode === 'week' ? setWeekFrom(addDays(weekFrom, 7)) : moveMonth(1))}
           />
         </View>
-        <Text accessibilityRole="header" style={[styles.heading, text]}>
+        <RubyText accessibilityRole="header" style={[styles.heading, text]}>
           {mode === 'week'
             ? `${t.dateShort(range.from)} 〜 ${t.dateShort(range.to)}`
             : t.monthTitle(ym.y, ym.m)}
-        </Text>
-        {preview && <Text style={[styles.body, sub]}>{t.previewNote}</Text>}
+        </RubyText>
+        {preview && <RubyText style={[styles.body, sub]}>{t.previewNote}</RubyText>}
 
         {mode === 'week' ? (
           eachDay(range.from, range.to).map((date) => (
@@ -116,7 +118,7 @@ export default function CalendarScreen() {
               onSelect={setSelected}
               viewOf={viewOf}
             />
-            <Text style={[styles.body, sub]}>{t.tapDayHint}</Text>
+            <RubyText style={[styles.body, sub]}>{t.tapDayHint}</RubyText>
             {selected >= range.from && selected <= range.to && (
               <DayCard day={viewOf(selected)} labelOf={labelOf} />
             )}
@@ -146,26 +148,26 @@ function DayCard({ day, labelOf }: { day: DayView; labelOf: (id: SubjectId) => s
         },
       ]}>
       <View style={styles.dayHeader}>
-        <Text style={[styles.dayTitle, text]}>{t.dateShort(day.date)}</Text>
+        <RubyText style={[styles.dayTitle, text]}>{t.dateShort(day.date)}</RubyText>
         {day.isToday && (
-          <Text style={[styles.badge, { backgroundColor: theme.tint, color: theme.onTint }]}>
+          <RubyText style={[styles.badge, { backgroundColor: theme.tint, color: theme.onTint }]}>
             {t.todayBadge}
-          </Text>
+          </RubyText>
         )}
       </View>
 
       {day.isRest ? (
-        <Text style={[styles.body, text]}>💤 {t.restDay}</Text>
+        <RubyText style={[styles.body, text]}>{`💤 ${t.restDay}`}</RubyText>
       ) : day.items.length === 0 && day.extras.length === 0 ? (
-        <Text style={[styles.body, { color: theme.textSecondary }]}>{t.noPlanDay}</Text>
+        <RubyText style={[styles.body, { color: theme.textSecondary }]}>{t.noPlanDay}</RubyText>
       ) : (
         <View style={styles.chips}>
           {day.items.map(({ slot, done }) => {
             const name = labelOf(slot.subjectId);
             return (
-              <Text
+              <RubyText
                 key={slot.order}
-                accessibilityLabel={done ? t.a11yItemDone(name) : name}
+                accessibilityLabel={done ? t.a11yItemDone(name) : kanaOnly(name)}
                 style={[
                   styles.chip,
                   done
@@ -173,13 +175,13 @@ function DayCard({ day, labelOf }: { day: DayView; labelOf: (id: SubjectId) => s
                     : { color: theme.text, borderColor: theme.border },
                 ]}>
                 {done ? `✓ ${name}` : name}
-              </Text>
+              </RubyText>
             );
           })}
           {day.extras.map(({ record, index }) => {
             const name = labelOf(record.subjectId);
             return (
-              <Text
+              <RubyText
                 key={`extra-${index}`}
                 accessibilityLabel={t.a11yItemDone(name)}
                 style={[
@@ -187,7 +189,7 @@ function DayCard({ day, labelOf }: { day: DayView; labelOf: (id: SubjectId) => s
                   { backgroundColor: theme.successBackground, color: theme.success, borderColor: theme.success },
                 ]}>
                 {`✓ ${name}`}
-              </Text>
+              </RubyText>
             );
           })}
         </View>
@@ -217,9 +219,9 @@ function MonthGrid({
   return (
     <View style={styles.grid}>
       {t.weekdayShort.map((w) => (
-        <Text key={w} style={[styles.cell, styles.weekday, { color: theme.textSecondary }]}>
+        <RubyText key={w} style={[styles.cell, styles.weekday, { color: theme.textSecondary }]}>
           {w}
-        </Text>
+        </RubyText>
       ))}
       {Array.from({ length: blanks }, (_, i) => (
         <View key={`blank-${i}`} style={styles.cell} />
@@ -228,8 +230,9 @@ function MonthGrid({
         const day = viewOf(date);
         const isSelected = date === selected;
         const showDone = day.isPast || day.isToday;
+        // マスはせまく、ふりがなを載せられないので、1〜2年生はひらがなにする
         const status = day.isRest
-          ? t.restDay
+          ? kanaOnly(t.restDay)
           : day.planned === 0
             ? ''
             : showDone

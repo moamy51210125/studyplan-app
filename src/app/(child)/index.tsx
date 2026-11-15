@@ -5,6 +5,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { BigButton } from '@/components/big-button';
 import { ReplanConfirmModal } from '@/components/replan-confirm-modal';
+import { RubyText } from '@/components/ruby-text';
 import { SubjectCard } from '@/components/subject-card';
 import { SubjectPickerModal } from '@/components/subject-picker-modal';
 import { FontSize, MaxContentWidth, Spacing } from '@/constants/theme';
@@ -110,15 +111,15 @@ export default function TodayScreen() {
   return (
     <SafeAreaView style={[styles.safeArea, { backgroundColor: theme.background }]}>
       <ScrollView contentContainerStyle={styles.content}>
-        <Text style={[styles.date, { color: theme.textSecondary }]}>{t.dateLong(today)}</Text>
-        <Text accessibilityRole="header" style={[styles.title, { color: theme.text }]}>
+        <RubyText style={[styles.date, { color: theme.textSecondary }]}>{t.dateLong(today)}</RubyText>
+        <RubyText accessibilityRole="header" style={[styles.title, { color: theme.text }]}>
           {t.title}
-        </Text>
+        </RubyText>
 
         {saveError && (
-          <Text accessibilityRole="alert" style={[styles.body, { color: theme.text }]}>
+          <RubyText accessibilityRole="alert" style={[styles.body, { color: theme.text }]}>
             {t.saveError}
-          </Text>
+          </RubyText>
         )}
 
         {upcomingExams(data.settings.exams, today).map((exam) => {
@@ -129,36 +130,32 @@ export default function TodayScreen() {
             <View
               key={`${exam.subjectId}-${exam.date}-${exam.grade}`}
               style={[styles.banner, { backgroundColor: theme.backgroundElement }]}>
-              <Text style={[styles.bannerText, { color: theme.text }]}>
-                🎯{' '}
-                {days === 0
-                  ? t.examToday(name, examGrade)
-                  : t.examCountdown(name, examGrade, days)}
-              </Text>
+              <RubyText style={[styles.bannerText, { color: theme.text }]}>
+                {`🎯 ${days === 0 ? t.examToday(name, examGrade) : t.examCountdown(name, examGrade, days)}`}
+              </RubyText>
             </View>
           );
         })}
 
         {waitingApproval && (
           <View style={[styles.banner, { backgroundColor: theme.backgroundElement }]}>
-            <Text style={[styles.body, { color: theme.text }]}>⏳ {t.waitingApproval}</Text>
+            <RubyText style={[styles.body, { color: theme.text }]}>{`⏳ ${t.waitingApproval}`}</RubyText>
           </View>
         )}
 
         {status.allDone && (
           <View style={[styles.banner, { backgroundColor: theme.successBackground }]}>
-            <Text style={[styles.bannerText, { color: theme.success }]}>🌟 {t.allDone}</Text>
+            <RubyText style={[styles.bannerText, { color: theme.success }]}>{`🌟 ${t.allDone}`}</RubyText>
           </View>
         )}
 
         {status.items.length === 0 ? (
           <View style={[styles.banner, { backgroundColor: theme.backgroundElement }]}>
-            <Text style={[styles.body, { color: theme.text }]}>{t.noPlanToday}</Text>
+            <RubyText style={[styles.body, { color: theme.text }]}>{t.noPlanToday}</RubyText>
             {next.length > 0 && (
-              <Text style={[styles.body, { color: theme.textSecondary }]}>
-                {t.nextPlan(t.dateShort(next[0].date))}：
-                {next.map((s) => labelOf(s.subjectId)).join('・')}
-              </Text>
+              <RubyText style={[styles.body, { color: theme.textSecondary }]}>
+                {`${t.nextPlan(t.dateShort(next[0].date))}：${next.map((s) => labelOf(s.subjectId)).join('・')}`}
+              </RubyText>
             )}
           </View>
         ) : (
@@ -177,9 +174,9 @@ export default function TodayScreen() {
 
         {status.extras.length > 0 && (
           <>
-            <Text accessibilityRole="header" style={[styles.subheading, { color: theme.text }]}>
+            <RubyText accessibilityRole="header" style={[styles.subheading, { color: theme.text }]}>
               {t.extrasTitle}
-            </Text>
+            </RubyText>
             {status.extras.map(({ record, index }) => (
               <SubjectCard
                 key={`extra-${index}`}

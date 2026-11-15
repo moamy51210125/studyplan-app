@@ -50,7 +50,7 @@ describe('学年による教科名', () => {
 
   test('学年が未設定・低学年ならひらがな、学年が上がると漢字', () => {
     expect(subjectLabelForChild(sansu)).toBe('さんすう');
-    expect(subjectLabelForChild(sansu, 2)).toBe('さんすう');
+    expect(subjectLabelForChild(sansu, 2)).toBe('{算数|さんすう}'); // 2年生はふりがな付き
     expect(subjectLabelForChild(sansu, 3)).toBe('算数');
     expect(subjectLabelForChild(eigo, 4)).toBe('えいご');
     expect(subjectLabelForChild(eigo, 5)).toBe('英語');

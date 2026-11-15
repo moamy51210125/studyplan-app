@@ -1,7 +1,8 @@
-import { Modal, ScrollView, StyleSheet, Text } from 'react-native';
+import { Modal, ScrollView, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { BigButton } from '@/components/big-button';
+import { RubyText } from '@/components/ruby-text';
 import { FontSize, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { useTodayText } from '@/hooks/use-today-text';
@@ -22,9 +23,9 @@ export function SubjectPickerModal({ visible, subjects, onPick, onCancel }: Subj
     <Modal visible={visible} animationType="slide" onRequestClose={onCancel}>
       <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
         <ScrollView contentContainerStyle={styles.content}>
-          <Text accessibilityRole="header" style={[styles.title, { color: theme.text }]}>
+          <RubyText accessibilityRole="header" style={[styles.title, { color: theme.text }]}>
             {t.pickerTitle}
-          </Text>
+          </RubyText>
           {subjects.map((s) => (
             <BigButton key={s.id} variant="secondary" label={s.label} onPress={() => onPick(s.id)} />
           ))}

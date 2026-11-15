@@ -4,6 +4,7 @@ import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { BigButton } from '@/components/big-button';
+import { RubyText } from '@/components/ruby-text';
 import { FontSize, MaxContentWidth, Spacing } from '@/constants/theme';
 import { useStudyData } from '@/hooks/use-study-data';
 import { useTheme } from '@/hooks/use-theme';
@@ -46,9 +47,9 @@ export default function ReviewScreen() {
   return (
     <SafeAreaView style={[styles.safeArea, { backgroundColor: theme.background }]}>
       <ScrollView contentContainerStyle={styles.content}>
-        <Text accessibilityRole="header" style={[styles.title, text]}>
+        <RubyText accessibilityRole="header" style={[styles.title, text]}>
           {t.reviewTitle}
-        </Text>
+        </RubyText>
 
         <View style={styles.tabs}>
           {(['week', 'month'] as const).map((k) => (
@@ -65,9 +66,9 @@ export default function ReviewScreen() {
 
         {/* 予定のうち、できた数（大きな数字） */}
         <View style={[styles.card, { backgroundColor: theme.successBackground }]}>
-          <Text style={[styles.cardTitle, text]}>{t.doneHeadline}</Text>
+          <RubyText style={[styles.cardTitle, text]}>{t.doneHeadline}</RubyText>
           {summary.planned === 0 ? (
-            <Text style={[styles.body, text]}>{t.noPlanInRange}</Text>
+            <RubyText style={[styles.body, text]}>{t.noPlanInRange}</RubyText>
           ) : (
             <View accessible accessibilityLabel={t.a11yDoneOf(summary.doneOfPlanned, summary.planned)}>
               <Text style={[styles.hero, { color: theme.success }]}>
@@ -91,9 +92,9 @@ export default function ReviewScreen() {
 
         {/* 教科ごとの、やった数（1色の横棒＋数字） */}
         <View style={[styles.card, { backgroundColor: theme.backgroundElement }]}>
-          <Text accessibilityRole="header" style={[styles.cardTitle, text]}>
+          <RubyText accessibilityRole="header" style={[styles.cardTitle, text]}>
             {t.balanceTitle}
-          </Text>
+          </RubyText>
           {summary.subjects.map((s) => (
             <View
               key={s.subjectId}
@@ -101,11 +102,11 @@ export default function ReviewScreen() {
               accessibilityLabel={t.a11yBalance(labelOf(s.subjectId), s.studied, s.planned)}
               style={styles.barRow}>
               <View style={styles.barHeader}>
-                <Text style={[styles.body, text]}>{labelOf(s.subjectId)}</Text>
-                <Text style={[styles.body, text]}>
-                  {t.countTimes(s.studied)}
-                  <Text style={sub}>{`（${t.plannedTimes(s.planned)}）`}</Text>
-                </Text>
+                <RubyText style={[styles.body, text]}>{labelOf(s.subjectId)}</RubyText>
+                <View style={styles.counts}>
+                  <RubyText style={[styles.body, text]}>{t.countTimes(s.studied)}</RubyText>
+                  <RubyText style={[styles.body, sub]}>{`（${t.plannedTimes(s.planned)}）`}</RubyText>
+                </View>
               </View>
               <View style={[styles.track, { backgroundColor: theme.background }]}>
                 {s.studied > 0 && (
@@ -123,11 +124,11 @@ export default function ReviewScreen() {
 
         {/* 気持ち（数の表） */}
         <View style={[styles.card, { backgroundColor: theme.backgroundElement }]}>
-          <Text accessibilityRole="header" style={[styles.cardTitle, text]}>
+          <RubyText accessibilityRole="header" style={[styles.cardTitle, text]}>
             {t.moodTitle}
-          </Text>
+          </RubyText>
           {withMood.length === 0 ? (
-            <Text style={[styles.body, text]}>{t.noMood}</Text>
+            <RubyText style={[styles.body, text]}>{t.noMood}</RubyText>
           ) : (
             withMood.map((s) => (
               <View
@@ -135,7 +136,7 @@ export default function ReviewScreen() {
                 accessible
                 accessibilityLabel={t.a11yMood(labelOf(s.subjectId), s.moods.good, s.moods.ok, s.moods.hard)}
                 style={[styles.moodRow, { borderColor: theme.border }]}>
-                <Text style={[styles.body, text, styles.moodName]}>{labelOf(s.subjectId)}</Text>
+                <RubyText style={[styles.body, text, styles.moodName]}>{labelOf(s.subjectId)}</RubyText>
                 <Text style={[styles.body, text]}>
                   😊 {s.moods.good}　😐 {s.moods.ok}　😣 {s.moods.hard}
                 </Text>
@@ -195,6 +196,11 @@ const styles = StyleSheet.create({
   },
   barRow: {
     gap: Spacing.one,
+  },
+  counts: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    alignItems: 'flex-end',
   },
   barHeader: {
     flexDirection: 'row',

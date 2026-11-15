@@ -1,7 +1,8 @@
-import { Modal, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Modal, ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { BigButton } from '@/components/big-button';
+import { RubyText } from '@/components/ruby-text';
 import { FontSize, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { useTodayText } from '@/hooks/use-today-text';
@@ -40,23 +41,23 @@ export function ReplanConfirmModal({
     <Modal visible={visible} animationType="slide" onRequestClose={onKeep}>
       <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
         <ScrollView contentContainerStyle={styles.content}>
-          <Text accessibilityRole="header" style={[styles.title, { color: theme.text }]}>
+          <RubyText accessibilityRole="header" style={[styles.title, { color: theme.text }]}>
             {title}
-          </Text>
-          <Text style={[styles.body, { color: theme.text }]}>{body}</Text>
+          </RubyText>
+          <RubyText style={[styles.body, { color: theme.text }]}>{body}</RubyText>
 
           {shown.map((c) => (
             <View
               key={`${c.date}#${c.order}`}
               style={[styles.row, { backgroundColor: theme.backgroundElement, borderColor: theme.border }]}>
-              <Text style={[styles.date, { color: theme.textSecondary }]}>{t.dateShort(c.date)}</Text>
-              <Text style={[styles.change, { color: theme.text }]}>
-                {name(c.from)} → {name(c.to)}
-              </Text>
+              <RubyText style={[styles.date, { color: theme.textSecondary }]}>{t.dateShort(c.date)}</RubyText>
+              <RubyText style={[styles.change, { color: theme.text }]}>
+                {`${name(c.from)} → ${name(c.to)}`}
+              </RubyText>
             </View>
           ))}
           {rest > 0 && (
-            <Text style={[styles.body, { color: theme.textSecondary }]}>{t.replanMore(rest)}</Text>
+            <RubyText style={[styles.body, { color: theme.textSecondary }]}>{t.replanMore(rest)}</RubyText>
           )}
 
           <BigButton label={t.replanOk} onPress={onAccept} />

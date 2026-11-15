@@ -1,11 +1,14 @@
-import { Pressable, StyleSheet, Text } from 'react-native';
+import { Pressable, StyleSheet } from 'react-native';
 
+import { RubyText } from '@/components/ruby-text';
 import { FontSize, MinTouchSize, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
+import { kanaOnly } from '@/strings/ruby';
 
 type Variant = 'primary' | 'secondary' | 'quiet';
 
 interface BigButtonProps {
+  /** 表示する文字（「{漢字|よみ}」のふりがなの印をふくんでもよい） */
   label: string;
   onPress: () => void;
   variant?: Variant;
@@ -37,7 +40,7 @@ export function BigButton({
   return (
     <Pressable
       accessibilityRole="button"
-      accessibilityLabel={accessibilityLabel ?? label}
+      accessibilityLabel={accessibilityLabel ?? kanaOnly(label)}
       accessibilityState={selected === undefined ? undefined : { selected }}
       onPress={onPress}
       style={({ pressed }) => [
@@ -45,9 +48,9 @@ export function BigButton({
         { backgroundColor: look.backgroundColor, borderColor: look.borderColor },
         pressed && styles.pressed,
       ]}>
-      <Text style={[styles.label, { color: look.color }, variant === 'quiet' && styles.quietLabel]}>
+      <RubyText style={[styles.label, { color: look.color }, variant === 'quiet' && styles.quietLabel]}>
         {label}
-      </Text>
+      </RubyText>
     </Pressable>
   );
 }

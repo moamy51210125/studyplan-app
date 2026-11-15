@@ -1,85 +1,126 @@
 import { weekdayOf } from '@/planner/dates';
 import type { DateKey } from '@/types/plan';
 
-/**
- * 子ども画面の文言。学年に合わせて2つの表示を切り替える。
- * - KANA: 学年が未設定・1〜2年生（ひらがな中心・分かち書き）
- * - KANJI: TEXT_KANJI_FROM_GRADE 年生から。1〜2年生で習う漢字だけを使う
- *   （今・日・教・科・合・分・入・人・休・一・月・曜 など）
- * 【仮・要確認】切り替える学年と、使う漢字
- */
-export const TEXT_KANJI_FROM_GRADE = 3;
+import { kanaOnly, markDateDay, markDayCount, resolveMarkup } from './ruby';
 
-const WEEKDAYS_KANA = ['にちようび', 'げつようび', 'かようび', 'すいようび', 'もくようび', 'きんようび', 'どようび'];
-const WEEKDAYS_SHORT_KANA = ['にち', 'げつ', 'か', 'すい', 'もく', 'きん', 'ど'];
-const WEEKDAYS_KANJI = ['日曜日', '月曜日', '火曜日', '水曜日', '木曜日', '金曜日', '土曜日'];
+/**
+ * 子ども画面の文言。
+ * 漢字には「{漢字|よみ|習う学年}」の印を付ける（src/strings/ruby.ts）。
+ * todayText(grade) で、学年に合わせて「ひらがな／ふりがな付き／漢字だけ」に変える。
+ * 表示は必ず RubyText（src/components/ruby-text.tsx）か BigButton を使う。
+ * 分かち書き（ことばの間の空白）は、ひらがなで読みやすいように入れる。
+ */
+
+const WEEKDAYS = [
+  '{日|にち|1}{曜|よう|2}{日|び|1}',
+  '{月|げつ|1}{曜|よう|2}{日|び|1}',
+  '{火|か|1}{曜|よう|2}{日|び|1}',
+  '{水|すい|1}{曜|よう|2}{日|び|1}',
+  '{木|もく|1}{曜|よう|2}{日|び|1}',
+  '{金|きん|1}{曜|よう|2}{日|び|1}',
+  '{土|ど|1}{曜|よう|2}{日|び|1}',
+];
+const WEEKDAYS_SHORT = [
+  '{日|にち|1}',
+  '{月|げつ|1}',
+  '{火|か|1}',
+  '{水|すい|1}',
+  '{木|もく|1}',
+  '{金|きん|1}',
+  '{土|ど|1}',
+];
 
 function monthAndDay(date: DateKey): [number, number] {
   const [, m, d] = date.split('-').map(Number);
   return [m, d];
 }
 
-const KANA = {
-  title: 'きょうの やること',
+const MARKED = {
+  title: '{今日|きょう|2}の やること',
   loading: 'じゅんびちゅう…',
   doneButton: 'できた！',
   doneBadge: 'できたね！',
   undo: 'とりけす',
   allDone: 'ぜんぶ できたね！ すごい！',
-  noPlanToday: 'きょうは べんきょうの よていは ないよ。ゆっくり やすもう！',
+  noPlanToday: '{今日|きょう|2}は べん{強|きょう|2}の よていは ないよ。ゆっくり {休|やす|1}もう！',
   nextPlan: (date: string) => `つぎは ${date} だよ`,
-  otherSubjectButton: 'ちがう きょうかを やった',
-  extrasTitle: 'ほかに やった きょうか',
-  pickerTitle: 'どの きょうかを やったかな？',
+  otherSubjectButton: 'ちがう {教科|きょうか|2}を やった',
+  extrasTitle: 'ほかに やった {教科|きょうか|2}',
+  pickerTitle: 'どの {教科|きょうか|2}を やったかな？',
   cancel: 'やめる',
   replanTitle: 'よていを かえても いい？',
-  replanBody: 'きょう やった きょうかに あわせて、これからの よていを こう かえるよ。',
+  replanBody: '{今日|きょう|2} やった {教科|きょうか|2}に {合|あ|2}わせて、これからの よていを こう かえるよ。',
   replanOk: 'いいよ',
   replanKeep: 'かえない',
   replanMore: (n: number) => `ほかに ${n}こ かわるよ`,
-  missedTitle: 'できなかった きょうかが あるよ',
-  missedBody: 'きのうまでに できなかった ぶんを、これからの よていに いれるね。こう かえても いい？',
-  examCountdown: (name: string, grade: string, days: number) => `${name} ${grade}まで あと ${days}にち`,
-  examToday: (name: string, grade: string) => `きょうは ${name} ${grade}の ひ！ がんばってね`,
-  waitingApproval: 'よていの へんこうは、おうちの ひとの かくにんを まってるよ',
-  parentEntry: 'おうちの ひとへ',
-  saveError: 'きろくが うまく できなかったよ。もう いちど おしてね',
+  missedTitle: 'できなかった {教科|きょうか|2}が あるよ',
+  missedBody:
+    'きのうまでに できなかった {分|ぶん|2}を、これからの よていに {入|い|1}れるね。こう かえても いい？',
+  examCountdown: (name: string, grade: string, days: number) =>
+    `${name} ${grade}まで あと ${markDayCount(days)}`,
+  examToday: (name: string, grade: string) => `{今日|きょう|2}は ${name} ${grade}の {日|ひ|1}！ がんばってね`,
+  waitingApproval: 'よていの へんこうは、おうちの {人|ひと|1}の かくにんを まってるよ',
+  parentEntry: 'おうちの {人|ひと|1}へ',
+  saveError: 'きろくが うまく できなかったよ。もう {一|いち|1}ど おしてね',
+
   // きょうの気持ち
   moodQuestion: 'どうだった？',
   moodGood: '😊 よかった',
   moodOk: '😐 ふつう',
   moodHard: '😣 むずかしかった',
+
   // ふりかえり
   reviewButton: 'ふりかえりを みる',
   reviewTitle: 'ふりかえり',
-  rangeWeek: 'こんしゅう',
-  rangeMonth: 'こんげつ',
-  doneHeadline: 'よていの うち できた かず',
+  rangeWeek: '{今週|こんしゅう|2}',
+  rangeMonth: '{今月|こんげつ|2}',
+  doneHeadline: 'よていの うち できた {数|かず|2}',
   noPlanInRange: 'まだ よていが ないよ',
-  balanceTitle: 'きょうかごとの やった かず',
-  countTimes: (n: number) => `${n}かい`,
-  plannedTimes: (n: number) => `よてい ${n}かい`,
-  moodTitle: 'きもち',
-  noMood: 'まだ きもちの きろくが ないよ。「できた！」の あとに えらんでね',
+  balanceTitle: '{教科|きょうか|2}ごとの やった {数|かず|2}',
+  countTimes: (n: number) => `${n}{回|かい|2}`,
+  plannedTimes: (n: number) => `よてい ${n}{回|かい|2}`,
+  moodTitle: '{気|き|1}もち',
+  noMood: 'まだ {気|き|1}もちの きろくが ないよ。「できた！」の あとに えらんでね',
   back: 'もどる',
+
   // よてい（カレンダー）
   calendarButton: 'よていを みる',
   calendarTitle: 'よてい',
-  viewWeek: 'しゅう',
-  viewMonth: 'つき',
-  prevWeek: '‹ まえの しゅう',
-  nextWeek: 'つぎの しゅう ›',
-  prevMonth: '‹ まえの つき',
-  nextMonth: 'つぎの つき ›',
-  monthTitle: (y: number, m: number) => `${y}ねん ${m}がつ`,
-  todayBadge: 'きょう',
-  restDay: 'おやすみ',
+  viewWeek: '{週|しゅう|2}',
+  viewMonth: '{月|つき|1}',
+  prevWeek: '‹ {前|まえ|2}の {週|しゅう|2}',
+  nextWeek: 'つぎの {週|しゅう|2} ›',
+  prevMonth: '‹ {前|まえ|2}の {月|つき|1}',
+  nextMonth: 'つぎの {月|つき|1} ›',
+  monthTitle: (y: number, m: number) => `${y}{年|ねん|1} ${m}{月|がつ|1}`,
+  todayBadge: '{今日|きょう|2}',
+  restDay: 'お{休|やす|1}み',
   noPlanDay: 'よていは ないよ',
-  previewNote: 'この つきの よていは、まだ かわるかも しれないよ',
-  tapDayHint: 'ひにちを タップすると、その ひの よていが みられるよ',
+  previewNote: 'この {月|つき|1}の よていは、まだ かわるかも しれないよ',
+  tapDayHint: '{日|ひ|1}にちを タップすると、その {日|ひ|1}の よていが {見|み|1}られるよ',
   cellPlanned: (n: number) => `${n}こ`,
-  weekdayShort: ['にち', 'げつ', 'か', 'すい', 'もく', 'きん', 'ど'],
-  // 読み上げ用はどの学年でも同じ
+  weekdayShort: WEEKDAYS_SHORT,
+
+  /** 例：11月 15日 日曜日（ひらがなでは 11がつ 15にち にちようび） */
+  dateLong: (date: DateKey) => {
+    const [m, d] = monthAndDay(date);
+    return `${m}{月|がつ|1} ${markDateDay(d)} ${WEEKDAYS[weekdayOf(date)]}`;
+  },
+  /** 例：11月16日（月） */
+  dateShort: (date: DateKey) => {
+    const [m, d] = monthAndDay(date);
+    return `${m}{月|がつ|1}${markDateDay(d)}（${WEEKDAYS_SHORT[weekdayOf(date)]}）`;
+  },
+
+  // 読み上げ用（名前が a11y で始まるもの）は、いつもひらがなにする
+  a11yDone: (subject: string) => `${subject}、できた`,
+  a11yDoneState: (subject: string) => `${subject}、できました`,
+  a11yUndo: (subject: string) => `${subject}の できたを とりけす`,
+  a11yDoneOf: (done: number, planned: number) => `よてい ${planned}この うち、${done}こ できた`,
+  a11yBalance: (name: string, done: number, planned: number) =>
+    `${name}、やった かず ${done}かい、よてい ${planned}かい`,
+  a11yMood: (name: string, good: number, ok: number, hard: number) =>
+    `${name}、よかった ${good}かい、ふつう ${ok}かい、むずかしかった ${hard}かい`,
   a11yDay: (date: string, planned: number, done: number, rest: boolean, past: boolean) =>
     rest
       ? `${date}、おやすみ`
@@ -89,76 +130,39 @@ const KANA = {
           ? `${date}、よてい ${planned}こ、できた ${done}こ`
           : `${date}、よてい ${planned}こ`,
   a11yItemDone: (name: string) => `${name}、できた`,
-  a11yDoneOf: (done: number, planned: number) => `よてい ${planned}この うち、${done}こ できた`,
-  a11yBalance: (name: string, done: number, planned: number) =>
-    `${name}、やった かず ${done}かい、よてい ${planned}かい`,
-  a11yMood: (name: string, good: number, ok: number, hard: number) =>
-    `${name}、よかった ${good}かい、ふつう ${ok}かい、むずかしかった ${hard}かい`,
-  a11yDone: (subject: string) => `${subject}、できた`,
-  a11yDoneState: (subject: string) => `${subject}、できました`,
-  a11yUndo: (subject: string) => `${subject}の できたを とりけす`,
-  /** 例：11がつ 15にち にちようび */
-  dateLong: (date: DateKey) => {
-    const [m, d] = monthAndDay(date);
-    return `${m}がつ ${d}にち ${WEEKDAYS_KANA[weekdayOf(date)]}`;
-  },
-  /** 例：11がつ16にち（げつ） */
-  dateShort: (date: DateKey) => {
-    const [m, d] = monthAndDay(date);
-    return `${m}がつ${d}にち（${WEEKDAYS_SHORT_KANA[weekdayOf(date)]}）`;
-  },
 };
 
-export type TodayText = typeof KANA;
-
-const KANJI: TodayText = {
-  ...KANA,
-  title: '今日の やること',
-  noPlanToday: '今日は べん強の よていは ないよ。ゆっくり 休もう！',
-  otherSubjectButton: 'ちがう 教科を やった',
-  extrasTitle: 'ほかに やった 教科',
-  pickerTitle: 'どの 教科を やったかな？',
-  replanBody: '今日 やった 教科に 合わせて、これからの よていを こう かえるよ。',
-  missedTitle: 'できなかった 教科が あるよ',
-  missedBody: 'きのうまでに できなかった 分を、これからの よていに 入れるね。こう かえても いい？',
-  examCountdown: (name, grade, days) => `${name} ${grade}まで あと ${days}日`,
-  examToday: (name, grade) => `今日は ${name} ${grade}の 日！ がんばってね`,
-  waitingApproval: 'よていの へんこうは、おうちの 人の かくにんを まってるよ',
-  parentEntry: 'おうちの 人へ',
-  saveError: 'きろくが うまく できなかったよ。もう 一ど おしてね',
-  rangeWeek: '今週',
-  rangeMonth: '今月',
-  doneHeadline: 'よていの うち できた 数',
-  balanceTitle: '教科ごとの やった 数',
-  countTimes: (n) => `${n}回`,
-  plannedTimes: (n) => `よてい ${n}回`,
-  moodTitle: '気もち',
-  noMood: 'まだ 気もちの きろくが ないよ。「できた！」の あとに えらんでね',
-  viewWeek: '週',
-  viewMonth: '月',
-  prevWeek: '‹ 前の 週',
-  nextWeek: 'つぎの 週 ›',
-  prevMonth: '‹ 前の 月',
-  nextMonth: 'つぎの 月 ›',
-  monthTitle: (y, m) => `${y}年 ${m}月`,
-  todayBadge: '今日',
-  restDay: 'お休み',
-  previewNote: 'この 月の よていは、まだ かわるかも しれないよ',
-  tapDayHint: '日にちを タップすると、その 日の よていが 見られるよ',
-  weekdayShort: ['日', '月', '火', '水', '木', '金', '土'],
-  /** 例：11月 15日 日曜日 */
-  dateLong: (date) => {
-    const [m, d] = monthAndDay(date);
-    return `${m}月 ${d}日 ${WEEKDAYS_KANJI[weekdayOf(date)]}`;
-  },
-  /** 例：11月16日（月） */
-  dateShort: (date) => {
-    const [m, d] = monthAndDay(date);
-    return `${m}月${d}日（${WEEKDAYS_KANJI[weekdayOf(date)].slice(0, 1)}）`;
-  },
+type Resolved<T> = {
+  [K in keyof T]: T[K] extends (...args: infer A) => string
+    ? (...args: A) => string
+    : T[K] extends readonly string[]
+      ? string[]
+      : string;
 };
 
-/** 学年に合った文言（未設定ならひらがな） */
+/** 学年に合わせた子ども画面の文言 */
+export type TodayText = Resolved<typeof MARKED>;
+
+const cache = new Map<number | undefined, TodayText>();
+
+/** 学年に合った文言（未設定ならひらがな、1〜2年生はふりがな付き、3年生以上は漢字） */
 export function todayText(grade?: number): TodayText {
-  return grade !== undefined && grade >= TEXT_KANJI_FROM_GRADE ? KANJI : KANA;
+  const cached = cache.get(grade);
+  if (cached) return cached;
+
+  const out: Record<string, unknown> = {};
+  for (const [key, value] of Object.entries(MARKED)) {
+    const fix = (s: string) =>
+      key.startsWith('a11y') ? kanaOnly(resolveMarkup(s, grade)) : resolveMarkup(s, grade);
+    if (typeof value === 'function') {
+      out[key] = (...args: unknown[]) => fix((value as (...a: unknown[]) => string)(...args));
+    } else if (Array.isArray(value)) {
+      out[key] = value.map(fix);
+    } else {
+      out[key] = fix(value as string);
+    }
+  }
+  const result = out as TodayText;
+  cache.set(grade, result);
+  return result;
 }
