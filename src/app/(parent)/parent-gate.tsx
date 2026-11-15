@@ -1,4 +1,4 @@
-import { router, Stack } from 'expo-router';
+import { router, Stack, useLocalSearchParams } from 'expo-router';
 import { useRef, useState } from 'react';
 import { ScrollView, StyleSheet, Text, TextInput } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -21,10 +21,14 @@ import { PARENT_TEXT } from '@/strings/parent';
 
 type Mode = 'enter' | 'create' | 'confirm' | 'forgot';
 
-/** 保護者モードの入口：暗証番号の入力・作成・忘れたとき */
+/**
+ * 保護者モードの入口：暗証番号の入力・作成・忘れたとき。
+ * ?setup=1 のときは、最初の起動時の設定（やめるボタンを出さない）。
+ */
 export default function ParentGateScreen() {
   const theme = useTheme();
   const { data, commit } = useStudyData();
+  const isSetup = useLocalSearchParams<{ setup?: string }>().setup === '1';
   const [mode, setMode] = useState<Mode | null>(null);
   const [input, setInput] = useState('');
   const [firstPin, setFirstPin] = useState('');
@@ -113,8 +117,19 @@ export default function ParentGateScreen() {
 
   return (
     <SafeAreaView style={[styles.safeArea, { backgroundColor: theme.background }]} edges={['bottom', 'left', 'right']}>
-      <Stack.Screen options={{ headerShown: true, title: PARENT_TEXT.gateTitle }} />
+      <Stack.Screen
+        options={{
+          headerShown: true,
+          title: isSetup ? PARENT_TEXT.setupTitle : PARENT_TEXT.gateTitle,
+          // 最初の設定では戻れないようにする
+          headerBackVisible: !isSetup,
+          gestureEnabled: !isSetup,
+        }}
+      />
       <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
+        {isSetup && current === 'create' && (
+          <Text style={[styles.body, { color: theme.text }]}>{PARENT_TEXT.setupIntro}</Text>
+        )}
         <Text style={[styles.body, { color: theme.text }]}>{prompt}</Text>
         {current === 'forgot' && (
           <Text style={[styles.question, { color: theme.text }]}>
@@ -147,7 +162,9 @@ export default function ParentGateScreen() {
         {current === 'enter' && (
           <BigButton variant="quiet" label={PARENT_TEXT.gateForgot} onPress={() => goTo('forgot')} />
         )}
-        <BigButton variant="quiet" label={PARENT_TEXT.cancel} onPress={() => router.back()} />
+        {!isSetup && (
+          <BigButton variant="quiet" label={PARENT_TEXT.cancel} onPress={() => router.back()} />
+        )}
       </ScrollView>
     </SafeAreaView>
   );

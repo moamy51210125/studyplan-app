@@ -182,7 +182,9 @@ export default function ParentScreen() {
           label={PARENT_TEXT.backToChild}
           onPress={() => {
             lockParent();
-            router.back();
+            // 最初の設定から来たときは戻る先がないので、子ども画面を開く
+            if (router.canGoBack()) router.back();
+            else router.replace('/');
           }}
         />
       </ScrollView>

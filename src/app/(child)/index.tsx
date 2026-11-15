@@ -1,4 +1,4 @@
-import { router } from 'expo-router';
+import { Redirect, router } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -48,6 +48,11 @@ export default function TodayScreen() {
         <Text style={[styles.body, { color: theme.text }]}>{TODAY_TEXT.loading}</Text>
       </SafeAreaView>
     );
+  }
+
+  // 暗証番号がまだ無ければ、最初に保護者に決めてもらう（子どもが先に決めてしまわないように）
+  if (!data.parent) {
+    return <Redirect href={{ pathname: '/parent-gate', params: { setup: '1' } }} />;
   }
 
   const status = todayStatus(data.plan, data.records, today);

@@ -5,6 +5,9 @@ import type { DateKey } from '@/types/plan';
 export const PARENT_TEXT = {
   // 暗証番号の画面
   gateTitle: '保護者の方へ',
+  setupTitle: 'はじめに（保護者の方へ）',
+  setupIntro:
+    'このアプリは小学生のお子さま向けの学習計画アプリです。はじめに、保護者の方が設定をお願いします。教科や回数を設定する「保護者モード」に入るための暗証番号を決めます。',
   gateEnterPin: '4けたの暗証番号を入力してください。',
   gateCreatePin: '保護者モード用の4けたの暗証番号を決めてください。お子さまに見られないようにご注意ください。',
   gateConfirmPin: '確認のため、もう一度入力してください。',
