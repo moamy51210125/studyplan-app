@@ -14,12 +14,12 @@ export const DEFAULT_SUBJECTS: readonly Subject[] = [
   { id: 'eiken', kind: 'exam', enabled: false },
 ];
 
-/** 初期設定（曜日ごとの回数は仮の値。ユーザー確認待ち） */
+/** 初期設定（曜日ごとの回数はユーザー決定 2026-11-15。初回起動の「1日の回数」で調整できる） */
 export function createDefaultSettings(): PlanSettings {
   return {
     subjects: DEFAULT_SUBJECTS.map((s) => ({ ...s })),
-    // 日曜 0 回、平日 2 回、土曜 3 回（仮）
-    slotsPerWeekday: { 0: 0, 1: 2, 2: 2, 3: 2, 4: 2, 5: 2, 6: 3 },
+    // 日曜 0 回、平日 1 回、土曜 2 回
+    slotsPerWeekday: { 0: 0, 1: 1, 2: 1, 3: 1, 4: 1, 5: 1, 6: 2 },
     restDays: [],
     exams: [],
   };

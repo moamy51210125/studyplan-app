@@ -15,16 +15,19 @@ import {
   addRecord,
   daysUntilExam,
   enabledSubjectIds,
+  homeworkForDay,
   isApprovalStale,
+  isHomeworkDone,
   nextStudyDay,
   removeRecordAt,
   replan,
   type ReplanResult,
+  setHomeworkDone,
   setRecordMood,
   todayStatus,
   upcomingExams,
 } from '@/planner';
-import { examGradeForChild, subjectLabelForChild } from '@/strings/subjects';
+import { cleanLabel, examGradeForChild, subjectLabelForChild } from '@/strings/subjects';
 import { useTodayText } from '@/hooks/use-today-text';
 import type { Mood, SubjectId } from '@/types/plan';
 
@@ -63,6 +66,15 @@ export default function TodayScreen() {
 
   const status = todayStatus(data.plan, data.records, today);
   const next = status.items.length === 0 ? nextStudyDay(data.plan, today) : [];
+  // 学校の宿題（月〜金。計画とは別に、いちばん上に出す）
+  const checks = data.homeworkChecks ?? [];
+  const homework = homeworkForDay(data.homework ?? [], today, data.settings.restDays).map((h) => ({
+    ...h,
+    done: isHomeworkDone(checks, today, h.id),
+  }));
+  const homeworkAllDone = homework.every((h) => h.done);
+  const checkHomework = (id: string, done: boolean) =>
+    commit({ ...data, homeworkChecks: setHomeworkDone(checks, today, id, done) });
 
   const markDone = (id: SubjectId) => commit({ ...data, records: addRecord(data.records, today, id) });
   const undo = (index: number) => commit({ ...data, records: removeRecordAt(data.records, index) });
@@ -143,10 +155,31 @@ export default function TodayScreen() {
           </View>
         )}
 
-        {status.allDone && (
+        {status.allDone && homeworkAllDone && (
           <View style={[styles.banner, { backgroundColor: theme.successBackground }]}>
             <RubyText style={[styles.bannerText, { color: theme.success }]}>{`🌟 ${t.allDone}`}</RubyText>
           </View>
+        )}
+
+        {homework.length > 0 && (
+          <>
+            <RubyText accessibilityRole="header" style={[styles.subheading, { color: theme.text }]}>
+              {`📒 ${t.homeworkTitle}`}
+            </RubyText>
+            {homework.map((h) => (
+              <SubjectCard
+                key={h.id}
+                kind="homework"
+                label={cleanLabel(h.label)}
+                done={h.done}
+                onDone={() => checkHomework(h.id, true)}
+                onUndo={() => checkHomework(h.id, false)}
+              />
+            ))}
+            <RubyText accessibilityRole="header" style={[styles.subheading, { color: theme.text }]}>
+              {t.planTitle}
+            </RubyText>
+          </>
         )}
 
         {status.items.length === 0 ? (

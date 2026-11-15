@@ -5,6 +5,7 @@ export * from './dates';
 export * from './defaults';
 export * from './exam-weight';
 export * from './exams';
+export * from './homework';
 export * from './replan';
 export * from './review';
 export * from './subjects';

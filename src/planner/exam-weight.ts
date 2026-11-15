@@ -3,7 +3,8 @@ import { daysBetween } from './dates';
 
 /**
  * 試験が近づいたときに、その教科の回数をどれだけ増やすか。
- * 【仮の値】根拠のある数字ではない。ユーザーに確認して決める。
+ * ユーザー決定（2026-11-15「おすすめで」）：30日前から1.5倍、14日前から2倍。
+ * 効果を断定する数字ではなく、試験前に少し多めに入るようにするための目安。
  * withinDays 日前以内なら weight 倍の割合で入りやすくなる（小さい withinDays を先に書く）。
  */
 export const EXAM_BOOST: readonly { withinDays: number; weight: number }[] = [

@@ -21,13 +21,14 @@ export const SUBJECT_LABELS: Record<string, { child: string; parent: string }> =
 };
 
 /** 自分で入力した名前から、ふりがなの印に使う記号を取りのぞく */
-function cleanCustom(label: string | undefined): string {
+/** 保護者が入力した名前から、ふりがなの印に使う記号を取りのぞく */
+export function cleanLabel(label: string | undefined): string {
   return (label ?? '').replace(/[{}|]/g, '');
 }
 
 /** 子ども画面の教科名（学年が未設定ならひらがな、1〜2年生はふりがな付きの印） */
 export function subjectLabelForChild(subject: Subject, grade?: number): string {
-  if (subject.kind === 'custom') return cleanCustom(subject.label);
+  if (subject.kind === 'custom') return cleanLabel(subject.label);
   const label = SUBJECT_LABELS[subject.id];
   if (!label) return subject.id;
   return resolveMarkup(label.child, grade);
@@ -35,7 +36,7 @@ export function subjectLabelForChild(subject: Subject, grade?: number): string {
 
 /** 保護者画面の教科名 */
 export function subjectLabelForParent(subject: Subject): string {
-  if (subject.kind === 'custom') return cleanCustom(subject.label);
+  if (subject.kind === 'custom') return cleanLabel(subject.label);
   return SUBJECT_LABELS[subject.id]?.parent ?? subject.id;
 }
 

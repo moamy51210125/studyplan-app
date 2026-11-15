@@ -8,9 +8,9 @@ const feb = buildMonthPlan(settings, 2027, 2);
 
 describe('dayView', () => {
   test('その日の予定・できた数・お休み・今日かどうか', () => {
-    const date = '2027-02-01'; // 月曜（初期設定で2回）
+    const date = '2027-02-06'; // 土曜（初期設定で2回）
     const subjectId = feb.find((s) => s.date === date)!.subjectId;
-    const v = dayView(feb, [{ date, subjectId }], ['2027-02-02'], date, '2027-02-03');
+    const v = dayView(feb, [{ date, subjectId }], ['2027-02-02'], date, '2027-02-07');
     expect(v).toMatchObject({ isToday: false, isPast: true, isRest: false, planned: 2, done: 1 });
     expect(dayView(feb, [], ['2027-02-02'], '2027-02-02', '2027-02-02')).toMatchObject({
       isToday: true,

@@ -2,7 +2,14 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import type { Appearance } from '@/constants/theme';
 import type { PendingApproval } from '@/planner/approval';
-import type { DateKey, PlannedSlot, PlanSettings, StudyRecord } from '@/types/plan';
+import type {
+  DateKey,
+  HomeworkCheck,
+  HomeworkItem,
+  PlannedSlot,
+  PlanSettings,
+  StudyRecord,
+} from '@/types/plan';
 
 /**
  * 端末の中に保存するデータ。端末の外には送らない（.claude/rules/child-privacy.md）。
@@ -27,6 +34,10 @@ export interface AppData {
   appearance?: Appearance;
   /** 最後にバックアップを書き出した日 */
   lastBackupDate?: DateKey;
+  /** 学校の宿題（月〜金に毎日出る。無ければ宿題わくは出さない） */
+  homework?: HomeworkItem[];
+  /** 宿題のチェック */
+  homeworkChecks?: HomeworkCheck[];
 }
 
 export interface ParentSettings {

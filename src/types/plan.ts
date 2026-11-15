@@ -71,3 +71,15 @@ export interface PlanChange {
 }
 
 export type SubjectCounts = Record<SubjectId, number>;
+
+/** 学校の宿題（保護者が子どもと相談して決める。月〜金に毎日出る） */
+export interface HomeworkItem {
+  id: string;
+  label: string;
+}
+
+/** 宿題のチェック（計画の組み直しには使わない） */
+export interface HomeworkCheck {
+  date: DateKey;
+  homeworkId: string;
+}

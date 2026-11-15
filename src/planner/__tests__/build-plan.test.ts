@@ -43,7 +43,7 @@ describe('buildPlan: 偏りのない計画', () => {
   });
 
   test('割り切れないときも、回数の差は1回まで', () => {
-    // 初期設定：5教科・平日2回・土曜3回・日曜0回（3月は31日）
+    // 初期設定：5教科・平日1回・土曜2回・日曜0回（3月は31日）
     const plan = buildMonthPlan(createDefaultSettings(), 2027, 3);
     expect(spread(plan, ['sansu', 'kokugo', 'rika', 'shakai', 'eigo'])).toBeLessThanOrEqual(1);
   });
@@ -95,12 +95,12 @@ describe('buildPlan: 設定の反映', () => {
   });
 
   test('曜日ごとの回数どおりに枠ができる', () => {
-    const settings = createDefaultSettings(); // 日0・平日2・土3
+    const settings = createDefaultSettings(); // 日0・平日1・土2
     const plan = buildPlan({ settings, from: '2027-02-01', to: '2027-02-07' });
     const perDay = eachDay('2027-02-01', '2027-02-07').map(
       (d) => plan.filter((s) => s.date === d).length,
     );
-    expect(perDay).toEqual([2, 2, 2, 2, 2, 3, 0]);
+    expect(perDay).toEqual([1, 1, 1, 1, 1, 2, 0]);
   });
 
   test('お休みの日には枠がなく、残りの日で偏りなく振り分ける', () => {

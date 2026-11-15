@@ -95,6 +95,16 @@ export const PARENT_TEXT = {
   examNone: '登録されている試験はありません。',
   examNeedAll: '教科・級・試験日をすべて入力してください。',
 
+  homeworkTitle: '学校の宿題',
+  homeworkNote:
+    'お子さまと相談して、毎日の宿題を登録してください。月曜〜金曜に、お子さまの画面のいちばん上に出て、チェックできます（お休みの日には出ません）。計画の回数やふりかえりには入りません。お子さまが読めることば（ひらがな等）で書くと読みやすくなります。',
+  homeworkLabel: '宿題を追加',
+  homeworkPlaceholder: '例：けいさんドリル、おんどく',
+  homeworkAdd: '追加',
+  homeworkRemove: '削除',
+  homeworkRemoveA11y: (name: string) => `宿題「${name}」を削除`,
+  homeworkNone: '登録されている宿題はありません。',
+
   gradeTitle: '学年',
   gradeNote:
     '学年に合わせて、お子さまの画面の教科名を漢字で表示するかを切り替えます（未設定のときはひらがな）。',

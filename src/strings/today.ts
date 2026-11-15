@@ -63,6 +63,11 @@ const MARKED = {
   parentEntry: 'おうちの {人|ひと|1}へ',
   saveError: 'きろくが うまく できなかったよ。もう {一|いち|1}ど おしてね',
 
+  // 学校の宿題（「宿題」は3年生の漢字なので、方針どおり ひらがなにする）
+  homeworkTitle: '{学|がっ|1}{校|こう|1}の しゅくだい',
+  homeworkCheck: 'やった！',
+  planTitle: 'べん{強|きょう|2}の よてい',
+
   // きょうの気持ち
   moodQuestion: 'どうだった？',
   moodGood: '😊 よかった',
@@ -136,6 +141,9 @@ const MARKED = {
           ? `${date}、よてい ${planned}こ、できた ${done}こ`
           : `${date}、よてい ${planned}こ`,
   a11yItemDone: (name: string) => `${name}、できた`,
+  a11yHomeworkDone: (name: string) => `しゅくだい、${name}、やった`,
+  a11yHomeworkState: (name: string) => `しゅくだい、${name}、やりました`,
+  a11yHomeworkUndo: (name: string) => `しゅくだい、${name}の やったを とりけす`,
 };
 
 type Resolved<T> = {

@@ -18,16 +18,23 @@ interface SubjectCardProps {
   /** できたあとの気持ち（未選択なら undefined） */
   mood?: Mood;
   onMood?: (mood: Mood) => void;
+  /** 'homework' は学校の宿題（ボタンは「やった！」、読み上げも宿題用） */
+  kind?: 'subject' | 'homework';
 }
 
 const MOODS: Mood[] = ['good', 'ok', 'hard'];
 
 /** 教科1つ分のカード。できたかどうかは色だけでなく文字と ✓ でも示す */
-export function SubjectCard({ label, done, onDone, onUndo, mood, onMood }: SubjectCardProps) {
+export function SubjectCard({ label, done, onDone, onUndo, mood, onMood, kind = 'subject' }: SubjectCardProps) {
   const theme = useTheme();
   const t = useTodayText();
   const moodLabel = { good: t.moodGood, ok: t.moodOk, hard: t.moodHard };
   const spoken = kanaOnly(label);
+  const homework = kind === 'homework';
+  const doneLabel = homework ? t.homeworkCheck : t.doneButton;
+  const a11yDone = homework ? t.a11yHomeworkDone : t.a11yDone;
+  const a11yState = homework ? t.a11yHomeworkState : t.a11yDoneState;
+  const a11yUndo = homework ? t.a11yHomeworkUndo : t.a11yUndo;
 
   return (
     <View
@@ -41,7 +48,7 @@ export function SubjectCard({ label, done, onDone, onUndo, mood, onMood }: Subje
       <View style={styles.topRow}>
         <RubyText
           style={[styles.label, { color: theme.text }]}
-          accessibilityLabel={done ? t.a11yDoneState(spoken) : spoken}>
+          accessibilityLabel={done ? a11yState(spoken) : spoken}>
           {label}
         </RubyText>
 
@@ -51,13 +58,13 @@ export function SubjectCard({ label, done, onDone, onUndo, mood, onMood }: Subje
             <BigButton
               variant="quiet"
               label={t.undo}
-              accessibilityLabel={t.a11yUndo(spoken)}
+              accessibilityLabel={a11yUndo(spoken)}
               onPress={onUndo}
             />
           </View>
         ) : (
           onDone && (
-            <BigButton label={t.doneButton} accessibilityLabel={t.a11yDone(spoken)} onPress={onDone} />
+            <BigButton label={doneLabel} accessibilityLabel={a11yDone(spoken)} onPress={onDone} />
           )
         )}
       </View>

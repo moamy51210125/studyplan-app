@@ -9,6 +9,7 @@ import { AppearanceSection } from '@/components/parent/appearance-section';
 import { BackupSection } from '@/components/parent/backup-section';
 import { ExamsSection } from '@/components/parent/exams-section';
 import { GradeSection } from '@/components/parent/grade-section';
+import { HomeworkSection } from '@/components/parent/homework-section';
 import { RestDaysSection } from '@/components/parent/rest-days-section';
 import { Section } from '@/components/parent/section';
 import { SlotsEditor } from '@/components/parent/slots-editor';
@@ -30,7 +31,7 @@ import type { PlanSettings, SubjectId } from '@/types/plan';
 const MAX_SHOWN_CHANGES = 5;
 const MAX_SUBJECT_NAME = 12;
 
-/** 保護者モード：確認待ちの変更、教科、曜日ごとの回数、お休みの日、試験日、学年、保護者確認の設定 */
+/** 保護者モード：確認待ちの変更、宿題、教科、曜日ごとの回数、お休みの日、試験日、学年、保護者確認の設定 */
 export default function ParentScreen() {
   const theme = useTheme();
   const { today, data, commit } = useStudyData();
@@ -110,6 +111,13 @@ export default function ParentScreen() {
             )}
           </Section>
         )}
+
+        {/* 宿題は計画の枠とは別なので、予定は作り直さない */}
+        <HomeworkSection
+          items={data.homework ?? []}
+          checks={data.homeworkChecks ?? []}
+          onChange={(homework, homeworkChecks) => commit({ ...data, homework, homeworkChecks })}
+        />
 
         <Section title={PARENT_TEXT.subjectsTitle} note={PARENT_TEXT.subjectsNote}>
           {data.settings.subjects.map((s) => {
