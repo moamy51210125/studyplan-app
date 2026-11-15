@@ -6,6 +6,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { BigButton } from '@/components/big-button';
 import { AmountSection } from '@/components/parent/amount-section';
 import { AppearanceSection } from '@/components/parent/appearance-section';
+import { BackupSection } from '@/components/parent/backup-section';
 import { ExamsSection } from '@/components/parent/exams-section';
 import { GradeSection } from '@/components/parent/grade-section';
 import { RestDaysSection } from '@/components/parent/rest-days-section';
@@ -163,6 +164,8 @@ export default function ParentScreen() {
           appearance={data.appearance}
           onChange={(appearance) => commit({ ...data, appearance })}
         />
+
+        <BackupSection data={data} today={today} commit={commit} />
 
         {data.parent && (
           <Section title={PARENT_TEXT.approvalSettingTitle} note={PARENT_TEXT.approvalSettingNote}>

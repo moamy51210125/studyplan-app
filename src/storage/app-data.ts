@@ -25,6 +25,8 @@ export interface AppData {
   grade?: number;
   /** 画面の色（未設定なら白） */
   appearance?: Appearance;
+  /** 最後にバックアップを書き出した日 */
+  lastBackupDate?: DateKey;
 }
 
 export interface ParentSettings {
@@ -53,7 +55,7 @@ export async function saveAppData(data: AppData): Promise<void> {
   await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(data));
 }
 
-function isAppData(x: unknown): x is AppData {
+export function isAppData(x: unknown): x is AppData {
   if (typeof x !== 'object' || x === null) return false;
   const d = x as Record<string, unknown>;
   return (

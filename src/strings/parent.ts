@@ -101,6 +101,26 @@ export const PARENT_TEXT = {
   gradeValue: (n: number) => `${n}年生`,
   gradeUnset: '未設定',
 
+  backupTitle: 'データの保存（バックアップ）',
+  backupNote:
+    'アプリを削除したり、スマホを買いかえたりすると、記録や設定は消えてしまいます。ときどき「書き出す」でバックアップファイルを作り、ファイルアプリやクラウドなどに保存してください。ファイルにはお子さまの学習記録と設定がふくまれるので、保存先にご注意ください。',
+  backupExport: '書き出す',
+  backupImport: '読み込む',
+  backupLast: (date: string) => `最後に書き出した日：${date}`,
+  backupNever: 'まだ書き出していません。',
+  backupShareTitle: 'バックアップファイルの保存先',
+  backupUnavailable: 'この端末ではファイルを共有できません。',
+  backupExportFailed: '書き出しに失敗しました。もう一度お試しください。',
+  backupImportFailed: 'ファイルを読み込めませんでした。もう一度お試しください。',
+  backupConfirmTitle: 'データを読み込みますか？',
+  backupConfirmBody: (date: string) =>
+    `${date}に書き出したデータで、今の記録と設定をすべて置きかえます。暗証番号も、書き出したときのものに戻ります。この操作は取り消せません。`,
+  backupConfirmOk: '読み込む',
+  backupConfirmCancel: 'やめる',
+  backupNotBackup: 'このファイルは、このアプリのバックアップではないか、こわれています。',
+  backupNewer: 'このファイルは新しいバージョンのアプリで作られたため、読み込めません。アプリを最新にしてからお試しください。',
+  backupRestored: 'データを読み込みました。',
+
   appearanceTitle: '画面の色',
   appearanceNote: '「スマホに合わせる」にすると、スマホのダークモードの設定に合わせて切り替わります。',
   appearanceLight: '白',
