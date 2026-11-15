@@ -199,6 +199,7 @@ export default function TodayScreen() {
           label={t.otherSubjectButton}
           onPress={() => setPickerOpen(true)}
         />
+        <BigButton variant="secondary" label={t.calendarButton} onPress={() => router.push('/calendar')} />
         <BigButton variant="secondary" label={t.reviewButton} onPress={() => router.push('/review')} />
 
         {/* 保護者モードへの入口（暗証番号で守る） */}

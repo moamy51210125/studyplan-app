@@ -62,7 +62,33 @@ const KANA = {
   moodTitle: 'きもち',
   noMood: 'まだ きもちの きろくが ないよ。「できた！」の あとに えらんでね',
   back: 'もどる',
+  // よてい（カレンダー）
+  calendarButton: 'よていを みる',
+  calendarTitle: 'よてい',
+  viewWeek: 'しゅう',
+  viewMonth: 'つき',
+  prevWeek: '‹ まえの しゅう',
+  nextWeek: 'つぎの しゅう ›',
+  prevMonth: '‹ まえの つき',
+  nextMonth: 'つぎの つき ›',
+  monthTitle: (y: number, m: number) => `${y}ねん ${m}がつ`,
+  todayBadge: 'きょう',
+  restDay: 'おやすみ',
+  noPlanDay: 'よていは ないよ',
+  previewNote: 'この つきの よていは、まだ かわるかも しれないよ',
+  tapDayHint: 'ひにちを タップすると、その ひの よていが みられるよ',
+  cellPlanned: (n: number) => `${n}こ`,
+  weekdayShort: ['にち', 'げつ', 'か', 'すい', 'もく', 'きん', 'ど'],
   // 読み上げ用はどの学年でも同じ
+  a11yDay: (date: string, planned: number, done: number, rest: boolean, past: boolean) =>
+    rest
+      ? `${date}、おやすみ`
+      : planned === 0
+        ? `${date}、よてい なし`
+        : past
+          ? `${date}、よてい ${planned}こ、できた ${done}こ`
+          : `${date}、よてい ${planned}こ`,
+  a11yItemDone: (name: string) => `${name}、できた`,
   a11yDoneOf: (done: number, planned: number) => `よてい ${planned}この うち、${done}こ できた`,
   a11yBalance: (name: string, done: number, planned: number) =>
     `${name}、やった かず ${done}かい、よてい ${planned}かい`,
@@ -108,6 +134,18 @@ const KANJI: TodayText = {
   plannedTimes: (n) => `よてい ${n}回`,
   moodTitle: '気もち',
   noMood: 'まだ 気もちの きろくが ないよ。「できた！」の あとに えらんでね',
+  viewWeek: '週',
+  viewMonth: '月',
+  prevWeek: '‹ 前の 週',
+  nextWeek: 'つぎの 週 ›',
+  prevMonth: '‹ 前の 月',
+  nextMonth: 'つぎの 月 ›',
+  monthTitle: (y, m) => `${y}年 ${m}月`,
+  todayBadge: '今日',
+  restDay: 'お休み',
+  previewNote: 'この 月の よていは、まだ かわるかも しれないよ',
+  tapDayHint: '日にちを タップすると、その 日の よていが 見られるよ',
+  weekdayShort: ['日', '月', '火', '水', '木', '金', '土'],
   /** 例：11月 15日 日曜日 */
   dateLong: (date) => {
     const [m, d] = monthAndDay(date);
