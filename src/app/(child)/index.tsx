@@ -12,6 +12,7 @@ import { useStudyData } from '@/hooks/use-study-data';
 import { useTheme } from '@/hooks/use-theme';
 import {
   addRecord,
+  daysUntilExam,
   enabledSubjectIds,
   isApprovalStale,
   nextStudyDay,
@@ -19,8 +20,9 @@ import {
   replan,
   type ReplanResult,
   todayStatus,
+  upcomingExams,
 } from '@/planner';
-import { subjectLabel } from '@/strings/subjects';
+import { examGradeForChild, subjectLabelForChild } from '@/strings/subjects';
 import { formatDateLong, formatDateShort, TODAY_TEXT } from '@/strings/today';
 import type { SubjectId } from '@/types/plan';
 
@@ -33,14 +35,15 @@ export default function TodayScreen() {
   const [proposal, setProposal] = useState<ReplanResult | null>(null);
 
   const subjects = data?.settings.subjects;
+  const grade = data?.grade;
   const labelOf = useMemo(() => {
     const byId = new Map((subjects ?? []).map((s) => [s.id, s]));
     return (id: SubjectId) => {
       const s = byId.get(id);
-      // 学年の設定ができるまでは、ひらがなで表示する
-      return s ? subjectLabel(s, false) : id;
+      // 学年に合わせて、ひらがな／漢字を切り替える（未設定ならひらがな）
+      return s ? subjectLabelForChild(s, grade) : id;
     };
-  }, [subjects]);
+  }, [subjects, grade]);
 
   if (!data) {
     return (
@@ -113,6 +116,24 @@ export default function TodayScreen() {
             {TODAY_TEXT.saveError}
           </Text>
         )}
+
+        {upcomingExams(data.settings.exams, today).map((exam) => {
+          const name = labelOf(exam.subjectId);
+          const examGrade = examGradeForChild(exam.grade);
+          const days = daysUntilExam(today, exam);
+          return (
+            <View
+              key={`${exam.subjectId}-${exam.date}-${exam.grade}`}
+              style={[styles.banner, { backgroundColor: theme.backgroundElement }]}>
+              <Text style={[styles.bannerText, { color: theme.text }]}>
+                🎯{' '}
+                {days === 0
+                  ? TODAY_TEXT.examToday(name, examGrade)
+                  : TODAY_TEXT.examCountdown(name, examGrade, days)}
+              </Text>
+            </View>
+          );
+        })}
 
         {waitingApproval && (
           <View style={[styles.banner, { backgroundColor: theme.backgroundElement }]}>

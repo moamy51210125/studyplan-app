@@ -1,9 +1,13 @@
 import { Redirect, router, Stack } from 'expo-router';
-import { type ReactNode, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { ScrollView, StyleSheet, Switch, Text, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { BigButton } from '@/components/big-button';
+import { ExamsSection } from '@/components/parent/exams-section';
+import { GradeSection } from '@/components/parent/grade-section';
+import { RestDaysSection } from '@/components/parent/rest-days-section';
+import { Section } from '@/components/parent/section';
 import { FontSize, MaxContentWidth, MinTouchSize, Spacing } from '@/constants/theme';
 import { useStudyData } from '@/hooks/use-study-data';
 import { useTheme } from '@/hooks/use-theme';
@@ -21,7 +25,7 @@ import {
   PARENT_TEXT,
   WEEKDAY_NAMES,
 } from '@/strings/parent';
-import { subjectLabel } from '@/strings/subjects';
+import { subjectLabelForParent } from '@/strings/subjects';
 import type { PlanSettings, SubjectId, Weekday } from '@/types/plan';
 
 /** 月曜から並べる */
@@ -29,7 +33,7 @@ const WEEKDAY_ORDER: Weekday[] = [1, 2, 3, 4, 5, 6, 0];
 const MAX_SHOWN_CHANGES = 5;
 const MAX_SUBJECT_NAME = 12;
 
-/** 保護者モード：確認待ちの変更、教科、曜日ごとの回数、保護者確認の設定 */
+/** 保護者モード：確認待ちの変更、教科、曜日ごとの回数、お休みの日、試験日、学年、保護者確認の設定 */
 export default function ParentScreen() {
   const theme = useTheme();
   const { today, data, commit } = useStudyData();
@@ -44,7 +48,7 @@ export default function ParentScreen() {
 
   const labelOf = (id: SubjectId) => {
     const s = data.settings.subjects.find((x) => x.id === id);
-    return s ? subjectLabel(s, true) : id;
+    return s ? subjectLabelForParent(s) : id;
   };
 
   /** 設定を変え、明日以降の予定を作り直す（古い確認待ちは前提が変わるので消す） */
@@ -116,7 +120,7 @@ export default function ParentScreen() {
 
         <Section title={PARENT_TEXT.subjectsTitle} note={PARENT_TEXT.subjectsNote}>
           {data.settings.subjects.map((s) => {
-            const label = subjectLabel(s, true);
+            const label = subjectLabelForParent(s);
             // 最後の1教科はオフにできない（計画が空になるため）
             const locked = s.enabled && enabledCount === 1;
             return (
@@ -165,6 +169,13 @@ export default function ParentScreen() {
           })}
         </Section>
 
+        <RestDaysSection settings={data.settings} today={today} onChange={updateSettings} />
+
+        <ExamsSection settings={data.settings} today={today} onChange={updateSettings} />
+
+        {/* 学年は表示だけに使うので、予定は作り直さない */}
+        <GradeSection grade={data.grade} onChange={(grade) => commit({ ...data, grade })} />
+
         {data.parent && (
           <Section title={PARENT_TEXT.approvalSettingTitle} note={PARENT_TEXT.approvalSettingNote}>
             <View style={[styles.row, { borderColor: theme.border }]}>
@@ -192,19 +203,6 @@ export default function ParentScreen() {
   );
 }
 
-function Section({ title, note, children }: { title: string; note?: string; children: ReactNode }) {
-  const theme = useTheme();
-  return (
-    <View style={[styles.section, { backgroundColor: theme.backgroundElement }]}>
-      <Text accessibilityRole="header" style={[styles.sectionTitle, { color: theme.text }]}>
-        {title}
-      </Text>
-      {note && <Text style={[styles.note, { color: theme.textSecondary }]}>{note}</Text>}
-      {children}
-    </View>
-  );
-}
-
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
@@ -215,19 +213,6 @@ const styles = StyleSheet.create({
     width: '100%',
     maxWidth: MaxContentWidth,
     alignSelf: 'center',
-  },
-  section: {
-    borderRadius: 16,
-    padding: Spacing.three,
-    gap: Spacing.two,
-  },
-  sectionTitle: {
-    fontSize: FontSize.heading - 4,
-    fontWeight: '700',
-  },
-  note: {
-    fontSize: 16,
-    lineHeight: 24,
   },
   body: {
     fontSize: 16,

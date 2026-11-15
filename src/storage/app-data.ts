@@ -20,6 +20,8 @@ export interface AppData {
   parent?: ParentSettings;
   /** 保護者の確認を待っている予定の変更（最新の1件だけ） */
   pendingApproval?: PendingApproval;
+  /** 子どもの学年（1〜6）。未設定ならひらがな中心で表示する */
+  grade?: number;
 }
 
 export interface ParentSettings {

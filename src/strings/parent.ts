@@ -52,6 +52,41 @@ export const PARENT_TEXT = {
     'オンにすると、お子さまが了承した予定の変更は、ここで「反映する」を押すまで反映されません。',
 
   replanned: '明日以降の予定を作り直しました。',
+
+  // カレンダー
+  prevMonth: '前の月',
+  nextMonth: '次の月',
+  calendarMonth: (y: number, m: number) => `${y}年${m}月`,
+
+  restTitle: 'お休みの日',
+  restNote:
+    '日付をタップすると、お休みにします（明日以降）。お休みの日の分は、ほかの日の量を増やさず、残りの日で教科が偏らないように割り振り直します。',
+  restMark: '休',
+  restA11y: (date: string, on: boolean) => `${date}${on ? '、お休み' : ''}`,
+  restCount: (n: number) => `お休みの日：${n}日`,
+
+  examsTitle: '試験日（漢検・英検）',
+  examsNote:
+    '試験日の30日前から少し多め、14日前からさらに多めに計画に入れます。登録した教科は計画に入ります。',
+  examSubject: '教科',
+  examGrade: '級',
+  examGradePlaceholder: '例：5級',
+  examDate: '試験日（カレンダーで選んでください）',
+  examDateChosen: (date: string) => `試験日：${date}`,
+  examMark: '✓',
+  examAdd: '登録',
+  examRemove: '削除',
+  examRemoveA11y: (name: string) => `${name}の試験を削除`,
+  examItem: (name: string, grade: string, date: string) => `${name}　${grade}　${date}`,
+  examDaysLeft: (n: number) => (n > 0 ? `あと${n}日` : n === 0 ? '本日' : '終了'),
+  examNone: '登録されている試験はありません。',
+  examNeedAll: '教科・級・試験日をすべて入力してください。',
+
+  gradeTitle: '学年',
+  gradeNote:
+    '学年に合わせて、お子さまの画面の教科名を漢字で表示するかを切り替えます（未設定のときはひらがな）。',
+  gradeValue: (n: number) => `${n}年生`,
+  gradeUnset: '未設定',
 } as const;
 
 export const WEEKDAY_NAMES = ['日曜', '月曜', '火曜', '水曜', '木曜', '金曜', '土曜'] as const;
