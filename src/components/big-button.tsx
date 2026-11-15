@@ -11,10 +11,18 @@ interface BigButtonProps {
   variant?: Variant;
   /** 読み上げ用。省略すると label を読む */
   accessibilityLabel?: string;
+  /** えらばれている状態か（読み上げにも伝える） */
+  selected?: boolean;
 }
 
 /** 子どもが押しやすい大きなボタン（高さ 56 以上、文字 20） */
-export function BigButton({ label, onPress, variant = 'primary', accessibilityLabel }: BigButtonProps) {
+export function BigButton({
+  label,
+  onPress,
+  variant = 'primary',
+  accessibilityLabel,
+  selected,
+}: BigButtonProps) {
   const theme = useTheme();
   const look = {
     primary: { backgroundColor: theme.tint, borderColor: theme.tint, color: theme.onTint },
@@ -30,6 +38,7 @@ export function BigButton({ label, onPress, variant = 'primary', accessibilityLa
     <Pressable
       accessibilityRole="button"
       accessibilityLabel={accessibilityLabel ?? label}
+      accessibilityState={selected === undefined ? undefined : { selected }}
       onPress={onPress}
       style={({ pressed }) => [
         styles.base,

@@ -16,15 +16,16 @@ import {
   enabledSubjectIds,
   isApprovalStale,
   nextStudyDay,
-  removeRecord,
+  removeRecordAt,
   replan,
   type ReplanResult,
+  setRecordMood,
   todayStatus,
   upcomingExams,
 } from '@/planner';
 import { examGradeForChild, subjectLabelForChild } from '@/strings/subjects';
 import { useTodayText } from '@/hooks/use-today-text';
-import type { SubjectId } from '@/types/plan';
+import type { Mood, SubjectId } from '@/types/plan';
 
 /** 子ども用：きょうの やること */
 export default function TodayScreen() {
@@ -63,7 +64,9 @@ export default function TodayScreen() {
   const next = status.items.length === 0 ? nextStudyDay(data.plan, today) : [];
 
   const markDone = (id: SubjectId) => commit({ ...data, records: addRecord(data.records, today, id) });
-  const undo = (id: SubjectId) => commit({ ...data, records: removeRecord(data.records, today, id) });
+  const undo = (index: number) => commit({ ...data, records: removeRecordAt(data.records, index) });
+  const chooseMood = (index: number, mood: Mood) =>
+    commit({ ...data, records: setRecordMood(data.records, index, mood) });
 
   const pickOther = (id: SubjectId) => {
     setPickerOpen(false);
@@ -159,13 +162,15 @@ export default function TodayScreen() {
             )}
           </View>
         ) : (
-          status.items.map((item) => (
+          status.items.map(({ slot, done }) => (
             <SubjectCard
-              key={item.slot.order}
-              label={labelOf(item.slot.subjectId)}
-              done={item.done}
-              onDone={() => markDone(item.slot.subjectId)}
-              onUndo={() => undo(item.slot.subjectId)}
+              key={slot.order}
+              label={labelOf(slot.subjectId)}
+              done={done !== null}
+              onDone={() => markDone(slot.subjectId)}
+              onUndo={() => done && undo(done.index)}
+              mood={done?.record.mood}
+              onMood={(mood) => done && chooseMood(done.index, mood)}
             />
           ))
         )}
@@ -175,12 +180,14 @@ export default function TodayScreen() {
             <Text accessibilityRole="header" style={[styles.subheading, { color: theme.text }]}>
               {t.extrasTitle}
             </Text>
-            {status.extras.map((r, i) => (
+            {status.extras.map(({ record, index }) => (
               <SubjectCard
-                key={`extra-${i}`}
-                label={labelOf(r.subjectId)}
+                key={`extra-${index}`}
+                label={labelOf(record.subjectId)}
                 done
-                onUndo={() => undo(r.subjectId)}
+                onUndo={() => undo(index)}
+                mood={record.mood}
+                onMood={(mood) => chooseMood(index, mood)}
               />
             ))}
           </>
@@ -192,6 +199,7 @@ export default function TodayScreen() {
           label={t.otherSubjectButton}
           onPress={() => setPickerOpen(true)}
         />
+        <BigButton variant="secondary" label={t.reviewButton} onPress={() => router.push('/review')} />
 
         {/* 保護者モードへの入口（暗証番号で守る） */}
         <View style={styles.parentEntry}>

@@ -1,16 +1,23 @@
-import type { DateKey, PlannedSlot, PlanSettings, StudyRecord, SubjectId } from '@/types/plan';
+import type { DateKey, Mood, PlannedSlot, PlanSettings, StudyRecord, SubjectId } from '@/types/plan';
 import { buildMonthPlan } from './build-plan';
+
+/** 記録と、records の中での位置（気持ちの記録や取り消しに使う） */
+export interface IndexedRecord {
+  record: StudyRecord;
+  index: number;
+}
 
 export interface TodayItem {
   slot: PlannedSlot;
-  done: boolean;
+  /** 割り当てられた記録（まだなら null） */
+  done: IndexedRecord | null;
 }
 
 export interface TodayStatus {
   /** 今日の予定（順番どおり）と、できたかどうか */
   items: TodayItem[];
   /** 予定に無かったけれど、やった記録 */
-  extras: StudyRecord[];
+  extras: IndexedRecord[];
   /** 予定がすべてできたか（予定が無い日は false） */
   allDone: boolean;
 }
@@ -24,21 +31,38 @@ export function todayStatus(
   records: readonly StudyRecord[],
   date: DateKey,
 ): TodayStatus {
-  const remaining = records.filter((r) => r.date === date);
+  const remaining: IndexedRecord[] = [];
+  records.forEach((record, index) => {
+    if (record.date === date) remaining.push({ record, index });
+  });
   const slots = plan.filter((s) => s.date === date).sort((a, b) => a.order - b.order);
 
   const items = slots.map((slot) => {
-    const i = remaining.findIndex((r) => r.subjectId === slot.subjectId);
-    if (i === -1) return { slot, done: false };
-    remaining.splice(i, 1);
-    return { slot, done: true };
+    const i = remaining.findIndex((r) => r.record.subjectId === slot.subjectId);
+    if (i === -1) return { slot, done: null };
+    const [done] = remaining.splice(i, 1);
+    return { slot, done };
   });
 
   return {
     items,
     extras: remaining,
-    allDone: items.length > 0 && items.every((item) => item.done),
+    allDone: items.length > 0 && items.every((item) => item.done !== null),
   };
+}
+
+/** index 番目の記録を取り消した新しい一覧を返す */
+export function removeRecordAt(records: readonly StudyRecord[], index: number): StudyRecord[] {
+  return records.filter((_, i) => i !== index);
+}
+
+/** index 番目の記録に気持ちを付けた新しい一覧を返す */
+export function setRecordMood(
+  records: readonly StudyRecord[],
+  index: number,
+  mood: Mood,
+): StudyRecord[] {
+  return records.map((r, i) => (i === index ? { ...r, mood } : r));
 }
 
 /** 記録を1つ足した新しい一覧を返す */

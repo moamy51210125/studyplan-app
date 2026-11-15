@@ -44,7 +44,30 @@ const KANA = {
   waitingApproval: 'よていの へんこうは、おうちの ひとの かくにんを まってるよ',
   parentEntry: 'おうちの ひとへ',
   saveError: 'きろくが うまく できなかったよ。もう いちど おしてね',
+  // きょうの気持ち
+  moodQuestion: 'どうだった？',
+  moodGood: '😊 よかった',
+  moodOk: '😐 ふつう',
+  moodHard: '😣 むずかしかった',
+  // ふりかえり
+  reviewButton: 'ふりかえりを みる',
+  reviewTitle: 'ふりかえり',
+  rangeWeek: 'こんしゅう',
+  rangeMonth: 'こんげつ',
+  doneHeadline: 'よていの うち できた かず',
+  noPlanInRange: 'まだ よていが ないよ',
+  balanceTitle: 'きょうかごとの やった かず',
+  countTimes: (n: number) => `${n}かい`,
+  plannedTimes: (n: number) => `よてい ${n}かい`,
+  moodTitle: 'きもち',
+  noMood: 'まだ きもちの きろくが ないよ。「できた！」の あとに えらんでね',
+  back: 'もどる',
   // 読み上げ用はどの学年でも同じ
+  a11yDoneOf: (done: number, planned: number) => `よてい ${planned}この うち、${done}こ できた`,
+  a11yBalance: (name: string, done: number, planned: number) =>
+    `${name}、やった かず ${done}かい、よてい ${planned}かい`,
+  a11yMood: (name: string, good: number, ok: number, hard: number) =>
+    `${name}、よかった ${good}かい、ふつう ${ok}かい、むずかしかった ${hard}かい`,
   a11yDone: (subject: string) => `${subject}、できた`,
   a11yDoneState: (subject: string) => `${subject}、できました`,
   a11yUndo: (subject: string) => `${subject}の できたを とりけす`,
@@ -77,6 +100,14 @@ const KANJI: TodayText = {
   waitingApproval: 'よていの へんこうは、おうちの 人の かくにんを まってるよ',
   parentEntry: 'おうちの 人へ',
   saveError: 'きろくが うまく できなかったよ。もう 一ど おしてね',
+  rangeWeek: '今週',
+  rangeMonth: '今月',
+  doneHeadline: 'よていの うち できた 数',
+  balanceTitle: '教科ごとの やった 数',
+  countTimes: (n) => `${n}回`,
+  plannedTimes: (n) => `よてい ${n}回`,
+  moodTitle: '気もち',
+  noMood: 'まだ 気もちの きろくが ないよ。「できた！」の あとに えらんでね',
   /** 例：11月 15日 日曜日 */
   dateLong: (date) => {
     const [m, d] = monthAndDay(date);

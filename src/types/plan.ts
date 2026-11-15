@@ -46,10 +46,15 @@ export interface PlannedSlot {
   subjectId: SubjectId;
 }
 
+/** きょうの気持ち（good: よかった / ok: ふつう / hard: むずかしかった） */
+export type Mood = 'good' | 'ok' | 'hard';
+
 /** 実際に勉強した記録 */
 export interface StudyRecord {
   date: DateKey;
   subjectId: SubjectId;
+  /** 終わったあとの気持ち（記録しなくてもよい） */
+  mood?: Mood;
 }
 
 /** 組み直しで変わる1枠分の差分（null は枠が無い／無くなる） */

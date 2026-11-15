@@ -5,5 +5,6 @@ export * from './defaults';
 export * from './exam-weight';
 export * from './exams';
 export * from './replan';
+export * from './review';
 export * from './subjects';
 export * from './today';
