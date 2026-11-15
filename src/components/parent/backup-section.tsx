@@ -1,4 +1,3 @@
-import { getDocumentAsync } from 'expo-document-picker';
 import { File, Paths } from 'expo-file-system';
 import { readAsStringAsync } from 'expo-file-system/legacy';
 import { isAvailableAsync, shareAsync } from 'expo-sharing';
@@ -27,16 +26,17 @@ function errorText(e: unknown): string {
 
 /**
  * 選んだファイルの中身を読む。
- * Android では、ファイルの場所（URI）に空白やカッコが変換されて入っていたり、
- * content:// の形だったりするため、それにも対応した readAsStringAsync を先に使い、
- * だめなら新しい File の読み方でもう一度ためす。
+ * File.pickFileAsync で選んだファイルは、読む権限もいっしょに受け取れる。
+ * （expo-document-picker は Expo Go 全体の一時フォルダにコピーするため、
+ *   Android の Expo Go ではアプリから読めなかった：2026-11-15 実機で確認）
+ * 念のため、だめなら readAsStringAsync でもう一度ためす。
  */
-async function readPickedFile(uri: string): Promise<string> {
+async function readPickedFile(file: File): Promise<string> {
   try {
-    return await readAsStringAsync(uri);
+    return await file.text();
   } catch (first) {
     try {
-      return await new File(uri).text();
+      return await readAsStringAsync(file.uri);
     } catch (second) {
       throw new Error(`${errorText(first)} / ${errorText(second)}`);
     }
@@ -79,9 +79,9 @@ export function BackupSection({ data, today, commit }: Props) {
     setMessage('');
     try {
       // 保存先によっては JSON と判定されないことがあるので、すべてのファイルを選べるようにする
-      const picked = await getDocumentAsync({ type: '*/*', copyToCacheDirectory: true });
+      const picked = await File.pickFileAsync({ mimeTypes: '*/*' });
       if (picked.canceled) return;
-      const content = await readPickedFile(picked.assets[0].uri);
+      const content = await readPickedFile(picked.result);
       const result = parseBackupText(content);
       if (!result.ok) {
         setMessage(result.reason === 'newer-version' ? PARENT_TEXT.backupNewer : PARENT_TEXT.backupNotBackup);
