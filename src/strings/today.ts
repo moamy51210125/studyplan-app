@@ -76,9 +76,13 @@ const MARKED = {
   rangeMonth: '{今月|こんげつ|2}',
   doneHeadline: 'よていの うち できた {数|かず|2}',
   noPlanInRange: 'まだ よていが ないよ',
-  balanceTitle: '{教科|きょうか|2}ごとの やった {数|かず|2}',
+  balanceTitle: '{教科|きょうか|2}ごとに よていの うち どれだけ できたか',
+  balanceHint: 'ぼうが ぜんぶ ぬれたら、よていどおり だよ',
+  /** 例：4 / 5回（やった数 / よていの数） */
+  balanceValue: (studied: number, planned: number) => `${studied} / ${planned}{回|かい|2}`,
   countTimes: (n: number) => `${n}{回|かい|2}`,
-  plannedTimes: (n: number) => `よてい ${n}{回|かい|2}`,
+  balanceOver: (n: number) => `よていより ${n}{回|かい|2} おおく できたよ！`,
+  balanceUnplanned: 'よていに なかったけど やったよ！',
   moodTitle: '{気|き|1}もち',
   noMood: 'まだ {気|き|1}もちの きろくが ないよ。「できた！」の あとに えらんでね',
   back: 'もどる',
@@ -117,8 +121,10 @@ const MARKED = {
   a11yDoneState: (subject: string) => `${subject}、できました`,
   a11yUndo: (subject: string) => `${subject}の できたを とりけす`,
   a11yDoneOf: (done: number, planned: number) => `よてい ${planned}この うち、${done}こ できた`,
-  a11yBalance: (name: string, done: number, planned: number) =>
-    `${name}、やった かず ${done}かい、よてい ${planned}かい`,
+  a11yBalance: (name: string, studied: number, planned: number) =>
+    planned === 0
+      ? `${name}、よていに なかったけど ${studied}かい やった`
+      : `${name}、よてい ${planned}かいの うち ${studied}かい やった`,
   a11yMood: (name: string, good: number, ok: number, hard: number) =>
     `${name}、よかった ${good}かい、ふつう ${ok}かい、むずかしかった ${hard}かい`,
   a11yDay: (date: string, planned: number, done: number, rest: boolean, past: boolean) =>

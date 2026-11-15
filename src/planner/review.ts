@@ -20,6 +20,30 @@ export interface ReviewSummary {
   subjects: SubjectSummary[];
 }
 
+export interface SubjectProgress {
+  /** 棒のぬる割合（0〜1）。満タン＝よていの回数 */
+  ratio: number;
+  /** よていどおり（以上）できたか（よていが無い教科は false） */
+  complete: boolean;
+  /** よていより多くやった回数 */
+  over: number;
+  /** よていに無かったのにやった教科か */
+  unplanned: boolean;
+}
+
+/** 教科ごとの、よていに対する進みぐあい */
+export function progressOf(s: Pick<SubjectSummary, 'planned' | 'studied'>): SubjectProgress {
+  if (s.planned === 0) {
+    return { ratio: s.studied > 0 ? 1 : 0, complete: false, over: 0, unplanned: s.studied > 0 };
+  }
+  return {
+    ratio: Math.min(1, s.studied / s.planned),
+    complete: s.studied >= s.planned,
+    over: Math.max(0, s.studied - s.planned),
+    unplanned: false,
+  };
+}
+
 /** from〜to（両端をふくむ）のふり返り */
 export function summarize(
   plan: readonly PlannedSlot[],

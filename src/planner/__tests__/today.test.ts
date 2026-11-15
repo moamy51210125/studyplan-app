@@ -12,7 +12,28 @@ import {
   setRecordMood,
   todayStatus,
 } from '../today';
-import { summarize } from '../review';
+import { progressOf, summarize } from '../review';
+
+describe('progressOf: 教科ごとの進みぐあい', () => {
+  test('よていの途中', () => {
+    expect(progressOf({ planned: 5, studied: 4 })).toEqual({
+      ratio: 0.8,
+      complete: false,
+      over: 0,
+      unplanned: false,
+    });
+  });
+
+  test('よていどおり・よていより多い', () => {
+    expect(progressOf({ planned: 5, studied: 5 })).toMatchObject({ ratio: 1, complete: true, over: 0 });
+    expect(progressOf({ planned: 5, studied: 6 })).toMatchObject({ ratio: 1, complete: true, over: 1 });
+  });
+
+  test('よていに無い教科をやった・まだやっていない', () => {
+    expect(progressOf({ planned: 0, studied: 3 })).toMatchObject({ ratio: 1, unplanned: true });
+    expect(progressOf({ planned: 3, studied: 0 })).toMatchObject({ ratio: 0, complete: false });
+  });
+});
 
 describe('気持ちの記録', () => {
   test('index 番目の記録に気持ちを付け、取り消せる', () => {

@@ -9,7 +9,7 @@ import { FontSize, MaxContentWidth, Spacing } from '@/constants/theme';
 import { useStudyData } from '@/hooks/use-study-data';
 import { useTheme } from '@/hooks/use-theme';
 import { useTodayText } from '@/hooks/use-today-text';
-import { monthRangeOf, summarize, weekRangeOf } from '@/planner';
+import { monthRangeOf, progressOf, summarize, weekRangeOf } from '@/planner';
 import { subjectLabelForChild } from '@/strings/subjects';
 import type { SubjectId } from '@/types/plan';
 
@@ -18,7 +18,8 @@ type Range = 'week' | 'month';
 /**
  * 子ども用：ふりかえり（今週・今月）
  * - 予定のうちできた数は、大きな数字1つで見せる（グラフにしない）
- * - 教科ごとの回数は、1色の横棒＋数字（色だけにたよらない。凡例は使わない）
+ * - 教科ごとは「よていに対する進みぐあい」の横棒＋「やった数 / よていの数」
+ *   （棒の満タン＝よていの回数。よていどおりなら ✓ と緑。色だけにたよらない。凡例は使わない）
  * - 気持ちは、数の表で見せる
  * - できなかった数は強調しない（.claude/rules/kid-friendly-ui.md）
  */
@@ -39,7 +40,6 @@ export default function ReviewScreen() {
     const s = data.settings.subjects.find((x) => x.id === id);
     return s ? subjectLabelForChild(s, data.grade) : id;
   };
-  const maxStudied = Math.max(1, ...summary.subjects.map((s) => s.studied));
   const withMood = summary.subjects.filter((s) => s.moods.good + s.moods.ok + s.moods.hard > 0);
   const text = { color: theme.text };
   const sub = { color: theme.textSecondary };
@@ -90,36 +90,42 @@ export default function ReviewScreen() {
           )}
         </View>
 
-        {/* 教科ごとの、やった数（1色の横棒＋数字） */}
+        {/* 教科ごとの、よていに対する進みぐあい（棒の満タン＝よていの回数） */}
         <View style={[styles.card, { backgroundColor: theme.backgroundElement }]}>
           <RubyText accessibilityRole="header" style={[styles.cardTitle, text]}>
             {t.balanceTitle}
           </RubyText>
-          {summary.subjects.map((s) => (
-            <View
-              key={s.subjectId}
-              accessible
-              accessibilityLabel={t.a11yBalance(labelOf(s.subjectId), s.studied, s.planned)}
-              style={styles.barRow}>
-              <View style={styles.barHeader}>
-                <RubyText style={[styles.body, text]}>{labelOf(s.subjectId)}</RubyText>
-                <View style={styles.counts}>
-                  <RubyText style={[styles.body, text]}>{t.countTimes(s.studied)}</RubyText>
-                  <RubyText style={[styles.body, sub]}>{`（${t.plannedTimes(s.planned)}）`}</RubyText>
+          <RubyText style={[styles.body, sub]}>{t.balanceHint}</RubyText>
+          {summary.subjects.map((s) => {
+            const p = progressOf(s);
+            const fillColor = p.complete || p.unplanned ? theme.success : theme.tint;
+            const value = p.unplanned ? t.countTimes(s.studied) : t.balanceValue(s.studied, s.planned);
+            return (
+              <View
+                key={s.subjectId}
+                accessible
+                accessibilityLabel={t.a11yBalance(labelOf(s.subjectId), s.studied, s.planned)}
+                style={styles.barRow}>
+                <View style={styles.barHeader}>
+                  <RubyText style={[styles.body, text, styles.bold]}>{labelOf(s.subjectId)}</RubyText>
+                  <RubyText style={[styles.body, text, styles.bold]}>
+                    {p.complete ? `✓ ${value}` : value}
+                  </RubyText>
                 </View>
-              </View>
-              <View style={[styles.track, { backgroundColor: theme.background }]}>
-                {s.studied > 0 && (
-                  <View
-                    style={[
-                      styles.fill,
-                      { backgroundColor: theme.tint, width: `${(s.studied / maxStudied) * 100}%` },
-                    ]}
-                  />
+                <View style={[styles.track, { backgroundColor: theme.background }]}>
+                  {p.ratio > 0 && (
+                    <View style={[styles.fill, { backgroundColor: fillColor, width: `${p.ratio * 100}%` }]} />
+                  )}
+                </View>
+                {p.over > 0 && (
+                  <RubyText style={[styles.body, { color: theme.success }]}>{t.balanceOver(p.over)}</RubyText>
+                )}
+                {p.unplanned && (
+                  <RubyText style={[styles.body, { color: theme.success }]}>{t.balanceUnplanned}</RubyText>
                 )}
               </View>
-            </View>
-          ))}
+            );
+          })}
         </View>
 
         {/* 気持ち（数の表） */}
@@ -197,10 +203,8 @@ const styles = StyleSheet.create({
   barRow: {
     gap: Spacing.one,
   },
-  counts: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    alignItems: 'flex-end',
+  bold: {
+    fontWeight: '700',
   },
   barHeader: {
     flexDirection: 'row',
