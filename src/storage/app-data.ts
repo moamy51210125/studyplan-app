@@ -1,5 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
+import type { Appearance } from '@/constants/theme';
 import type { PendingApproval } from '@/planner/approval';
 import type { DateKey, PlannedSlot, PlanSettings, StudyRecord } from '@/types/plan';
 
@@ -22,6 +23,8 @@ export interface AppData {
   pendingApproval?: PendingApproval;
   /** 子どもの学年（1〜6）。未設定ならひらがな中心で表示する */
   grade?: number;
+  /** 画面の色（未設定なら白） */
+  appearance?: Appearance;
 }
 
 export interface ParentSettings {

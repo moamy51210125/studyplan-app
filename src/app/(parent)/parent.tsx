@@ -4,6 +4,7 @@ import { ScrollView, StyleSheet, Switch, Text, TextInput, View } from 'react-nat
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { BigButton } from '@/components/big-button';
+import { AppearanceSection } from '@/components/parent/appearance-section';
 import { ExamsSection } from '@/components/parent/exams-section';
 import { GradeSection } from '@/components/parent/grade-section';
 import { RestDaysSection } from '@/components/parent/rest-days-section';
@@ -173,8 +174,12 @@ export default function ParentScreen() {
 
         <ExamsSection settings={data.settings} today={today} onChange={updateSettings} />
 
-        {/* 学年は表示だけに使うので、予定は作り直さない */}
+        {/* 学年と画面の色は表示だけに使うので、予定は作り直さない */}
         <GradeSection grade={data.grade} onChange={(grade) => commit({ ...data, grade })} />
+        <AppearanceSection
+          appearance={data.appearance}
+          onChange={(appearance) => commit({ ...data, appearance })}
+        />
 
         {data.parent && (
           <Section title={PARENT_TEXT.approvalSettingTitle} note={PARENT_TEXT.approvalSettingNote}>

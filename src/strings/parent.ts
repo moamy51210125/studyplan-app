@@ -87,6 +87,12 @@ export const PARENT_TEXT = {
     '学年に合わせて、お子さまの画面の教科名を漢字で表示するかを切り替えます（未設定のときはひらがな）。',
   gradeValue: (n: number) => `${n}年生`,
   gradeUnset: '未設定',
+
+  appearanceTitle: '画面の色',
+  appearanceNote: '「スマホに合わせる」にすると、スマホのダークモードの設定に合わせて切り替わります。',
+  appearanceLight: '白',
+  appearanceDark: 'ダーク',
+  appearanceSystem: 'スマホに合わせる',
 } as const;
 
 export const WEEKDAY_NAMES = ['日曜', '月曜', '火曜', '水曜', '木曜', '金曜', '土曜'] as const;

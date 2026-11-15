@@ -1,6 +1,7 @@
 /**
  * アプリの色・文字・すき間。
- * スマホがダークモードでも、いつも白い背景の温かみのある色で表示する（ユーザー決定 2026-11-15）。
+ * 白（light）とダーク（dark）の2つ。どちらを使うかは保護者モードで選ぶ（はじめは白）。
+ * どちらも温かみのある色にする（ユーザー決定 2026-11-15）。
  * 文字と背景のコントラストは WCAG AA（4.5 以上）を計算で確認済み（.claude/rules/kid-friendly-ui.md）。
  */
 
@@ -25,9 +26,38 @@ export const Colors = {
     success: '#256B2A',
     successBackground: '#EAF6E4',
   },
+  dark: {
+    /** クリーム色の文字（背景に対して 14.8） */
+    text: '#F6EBDD',
+    textSecondary: '#CDB7A0',
+    /** 真っ黒ではなく、温かみのある濃い茶色 */
+    background: '#1F1914',
+    backgroundElement: '#2C231C',
+    backgroundSelected: '#3B2F26',
+    border: '#5E4A39',
+    /** やわらかいオレンジ（上の文字は濃い茶色で 8.6） */
+    tint: '#F2A766',
+    onTint: '#2A1608',
+    success: '#93D69D',
+    successBackground: '#1E3322',
+  },
 } as const;
 
-export type ThemeColor = keyof typeof Colors.light;
+export type ThemeColor = keyof typeof Colors.light & keyof typeof Colors.dark;
+export type ColorScheme = keyof typeof Colors;
+
+/** 画面の色の設定（white = 白、dark = ダーク、system = スマホに合わせる） */
+export type Appearance = 'light' | 'dark' | 'system';
+
+/** 設定とスマホのモードから、使う色を決める（設定が無ければ白） */
+export function resolveColorScheme(
+  appearance: Appearance | undefined,
+  system: string | null | undefined,
+): ColorScheme {
+  if (appearance === 'dark') return 'dark';
+  if (appearance === 'system') return system === 'dark' ? 'dark' : 'light';
+  return 'light';
+}
 
 export const Fonts = Platform.select({
   ios: {
