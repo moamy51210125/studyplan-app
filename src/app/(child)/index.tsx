@@ -1,3 +1,4 @@
+import { router } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -7,11 +8,12 @@ import { ReplanConfirmModal } from '@/components/replan-confirm-modal';
 import { SubjectCard } from '@/components/subject-card';
 import { SubjectPickerModal } from '@/components/subject-picker-modal';
 import { FontSize, MaxContentWidth, Spacing } from '@/constants/theme';
-import { useStudyData, useToday } from '@/hooks/use-study-data';
+import { useStudyData } from '@/hooks/use-study-data';
 import { useTheme } from '@/hooks/use-theme';
 import {
   addRecord,
   enabledSubjectIds,
+  isApprovalStale,
   nextStudyDay,
   removeRecord,
   replan,
@@ -25,8 +27,7 @@ import type { SubjectId } from '@/types/plan';
 /** 子ども用：きょうの やること */
 export default function TodayScreen() {
   const theme = useTheme();
-  const today = useToday();
-  const { data, commit, saveError, missedReview, dismissMissedReview } = useStudyData(today);
+  const { today, data, commit, saveError, missedReview, dismissMissedReview } = useStudyData();
   const [pickerOpen, setPickerOpen] = useState(false);
   /** 「ちがう きょうかを やった」ときの組み直し案 */
   const [proposal, setProposal] = useState<ReplanResult | null>(null);
@@ -79,9 +80,20 @@ export default function TodayScreen() {
   };
 
   const acceptProposal = () => {
-    if (active) commit({ ...data, plan: active.result.plan });
+    if (active) {
+      const { plan, changes } = active.result;
+      // 保護者のかくにんがオンなら、反映せずに確認待ちにする（最新の1件だけ残す）
+      commit(
+        data.parent?.requireApproval
+          ? { ...data, pendingApproval: { createdOn: today, plan, changes } }
+          : { ...data, plan },
+      );
+    }
     closeProposal();
   };
+
+  const waitingApproval =
+    data.pendingApproval !== undefined && !isApprovalStale(data.pendingApproval, today);
 
   return (
     <SafeAreaView style={[styles.safeArea, { backgroundColor: theme.background }]}>
@@ -95,6 +107,12 @@ export default function TodayScreen() {
           <Text accessibilityRole="alert" style={[styles.body, { color: theme.text }]}>
             {TODAY_TEXT.saveError}
           </Text>
+        )}
+
+        {waitingApproval && (
+          <View style={[styles.banner, { backgroundColor: theme.backgroundElement }]}>
+            <Text style={[styles.body, { color: theme.text }]}>⏳ {TODAY_TEXT.waitingApproval}</Text>
+          </View>
         )}
 
         {status.allDone && (
@@ -147,6 +165,15 @@ export default function TodayScreen() {
           label={TODAY_TEXT.otherSubjectButton}
           onPress={() => setPickerOpen(true)}
         />
+
+        {/* 保護者モードへの入口（暗証番号で守る） */}
+        <View style={styles.parentEntry}>
+          <BigButton
+            variant="quiet"
+            label={TODAY_TEXT.parentEntry}
+            onPress={() => router.push('/parent-gate')}
+          />
+        </View>
       </ScrollView>
 
       <SubjectPickerModal
@@ -212,5 +239,9 @@ const styles = StyleSheet.create({
   },
   spacer: {
     height: Spacing.three,
+  },
+  parentEntry: {
+    marginTop: Spacing.five,
+    alignItems: 'center',
   },
 });

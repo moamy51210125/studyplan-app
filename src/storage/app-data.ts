@@ -1,5 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
+import type { PendingApproval } from '@/planner/approval';
 import type { DateKey, PlannedSlot, PlanSettings, StudyRecord } from '@/types/plan';
 
 /**
@@ -15,6 +16,18 @@ export interface AppData {
   records: StudyRecord[];
   /** 最後にアプリを開いた日（その日はじめて開いたときの見直しに使う） */
   lastOpenedDate?: DateKey;
+  /** 保護者モードの設定（無ければ暗証番号は未設定・確認はオフ） */
+  parent?: ParentSettings;
+  /** 保護者の確認を待っている予定の変更（最新の1件だけ） */
+  pendingApproval?: PendingApproval;
+}
+
+export interface ParentSettings {
+  /** 暗証番号のハッシュ値とソルト（番号そのものは保存しない。src/parent/pin.ts） */
+  pinHash: string;
+  pinSalt: string;
+  /** 子どもが「いいよ」を押した予定の変更を、保護者が確認してから反映するか */
+  requireApproval: boolean;
 }
 
 const STORAGE_KEY = 'studyplan/app-data';

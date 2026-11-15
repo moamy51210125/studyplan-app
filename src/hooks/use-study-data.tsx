@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { createContext, type ReactNode, useCallback, useContext, useEffect, useState } from 'react';
 import { AppState } from 'react-native';
 
 import {
@@ -12,7 +12,7 @@ import { type AppData, loadAppData, saveAppData } from '@/storage/app-data';
 import type { DateKey } from '@/types/plan';
 
 /** 端末の「今日」。アプリに戻ってきたときに日付が変わっていれば更新する */
-export function useToday(): DateKey {
+function useToday(): DateKey {
   const [today, setToday] = useState(() => toDateKey(new Date()));
   useEffect(() => {
     const sub = AppState.addEventListener('change', (state) => {
@@ -27,12 +27,26 @@ function createEmptyData(): AppData {
   return { version: 1, settings: createDefaultSettings(), plan: [], plannedMonths: [], records: [] };
 }
 
+interface StudyDataValue {
+  today: DateKey;
+  /** 読み込み中は null */
+  data: AppData | null;
+  /** 新しいデータを画面に反映し、端末に保存する */
+  commit: (next: AppData) => void;
+  saveError: boolean;
+  /** その日はじめて開いたときの、やらなかった予定の埋め合わせ案 */
+  missedReview: ReplanResult | null;
+  dismissMissedReview: () => void;
+}
+
+const StudyDataContext = createContext<StudyDataValue | null>(null);
+
 /**
- * 保存データを読み、今日の月の計画が無ければ作る。
- * その日はじめて開いたときは、やらなかった予定の埋め合わせ案（missedReview）を用意する。
- * commit で新しいデータを画面に反映し、端末に保存する。
+ * 保存データをアプリ全体で1つだけ持つ。
+ * （画面ごとに読み込むと、ある画面の変更を別の画面が古いデータで上書きしてしまうため）
  */
-export function useStudyData(today: DateKey) {
+export function StudyDataProvider({ children }: { children: ReactNode }) {
+  const today = useToday();
   const [data, setData] = useState<AppData | null>(null);
   const [saveError, setSaveError] = useState(false);
   const [missedReview, setMissedReview] = useState<ReplanResult | null>(null);
@@ -73,5 +87,16 @@ export function useStudyData(today: DateKey) {
 
   const dismissMissedReview = useCallback(() => setMissedReview(null), []);
 
-  return { data, commit, saveError, missedReview, dismissMissedReview };
+  return (
+    <StudyDataContext.Provider
+      value={{ today, data, commit, saveError, missedReview, dismissMissedReview }}>
+      {children}
+    </StudyDataContext.Provider>
+  );
+}
+
+export function useStudyData(): StudyDataValue {
+  const value = useContext(StudyDataContext);
+  if (!value) throw new Error('StudyDataProvider の中で使ってください');
+  return value;
 }

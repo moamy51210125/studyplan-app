@@ -1,0 +1,277 @@
+import { Redirect, router, Stack } from 'expo-router';
+import { type ReactNode, useEffect, useState } from 'react';
+import { ScrollView, StyleSheet, Switch, Text, TextInput, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+
+import { BigButton } from '@/components/big-button';
+import { FontSize, MaxContentWidth, MinTouchSize, Spacing } from '@/constants/theme';
+import { useStudyData } from '@/hooks/use-study-data';
+import { useTheme } from '@/hooks/use-theme';
+import { isParentUnlocked, lockParent } from '@/parent/session';
+import {
+  addCustomSubject,
+  applyApproval,
+  applySettingsChange,
+  isApprovalStale,
+  setSubjectEnabled,
+} from '@/planner';
+import {
+  formatDateParent,
+  MAX_SLOTS_PER_DAY,
+  PARENT_TEXT,
+  WEEKDAY_NAMES,
+} from '@/strings/parent';
+import { subjectLabel } from '@/strings/subjects';
+import type { PlanSettings, SubjectId, Weekday } from '@/types/plan';
+
+/** 月曜から並べる */
+const WEEKDAY_ORDER: Weekday[] = [1, 2, 3, 4, 5, 6, 0];
+const MAX_SHOWN_CHANGES = 5;
+const MAX_SUBJECT_NAME = 12;
+
+/** 保護者モード：確認待ちの変更、教科、曜日ごとの回数、保護者確認の設定 */
+export default function ParentScreen() {
+  const theme = useTheme();
+  const { today, data, commit } = useStudyData();
+  const [notice, setNotice] = useState('');
+  const [newSubject, setNewSubject] = useState('');
+
+  // 画面を離れたら保護者モードを閉じる
+  useEffect(() => () => lockParent(), []);
+
+  if (!isParentUnlocked()) return <Redirect href="/parent-gate" />;
+  if (!data) return null;
+
+  const labelOf = (id: SubjectId) => {
+    const s = data.settings.subjects.find((x) => x.id === id);
+    return s ? subjectLabel(s, true) : id;
+  };
+
+  /** 設定を変え、明日以降の予定を作り直す（古い確認待ちは前提が変わるので消す） */
+  const updateSettings = (settings: PlanSettings) => {
+    const plan = applySettingsChange(settings, data.plan, data.records, today);
+    commit({ ...data, settings, plan, pendingApproval: undefined });
+    setNotice(PARENT_TEXT.replanned);
+  };
+
+  const enabledCount = data.settings.subjects.filter((s) => s.enabled).length;
+  const pending = data.pendingApproval;
+  const pendingStale = pending !== undefined && isApprovalStale(pending, today);
+
+  const applyPending = () => {
+    if (!pending) return;
+    const plan = applyApproval(data.plan, pending, today);
+    commit({ ...data, plan: plan ?? data.plan, pendingApproval: undefined });
+  };
+
+  const addSubject = () => {
+    const name = newSubject.trim();
+    if (name === '') return;
+    updateSettings({ ...data.settings, subjects: addCustomSubject(data.settings.subjects, name) });
+    setNewSubject('');
+  };
+
+  const setSlots = (day: Weekday, value: number) => {
+    const n = Math.min(MAX_SLOTS_PER_DAY, Math.max(0, value));
+    updateSettings({ ...data.settings, slotsPerWeekday: { ...data.settings.slotsPerWeekday, [day]: n } });
+  };
+
+  const text = { color: theme.text };
+  const sub = { color: theme.textSecondary };
+
+  return (
+    <SafeAreaView style={[styles.safeArea, { backgroundColor: theme.background }]} edges={['bottom', 'left', 'right']}>
+      <Stack.Screen options={{ headerShown: true, title: PARENT_TEXT.homeTitle }} />
+      <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
+        {notice !== '' && (
+          <Text accessibilityRole="alert" style={[styles.notice, { color: theme.success, backgroundColor: theme.successBackground }]}>
+            {notice}
+          </Text>
+        )}
+
+        {pending && (
+          <Section title={PARENT_TEXT.approvalTitle}>
+            {pendingStale ? (
+              <>
+                <Text style={[styles.body, text]}>{PARENT_TEXT.approvalStale}</Text>
+                <BigButton variant="secondary" label={PARENT_TEXT.approvalDiscard} onPress={() => commit({ ...data, pendingApproval: undefined })} />
+              </>
+            ) : (
+              <>
+                <Text style={[styles.body, text]}>{PARENT_TEXT.approvalBody(formatDateParent(pending.createdOn))}</Text>
+                {pending.changes.slice(0, MAX_SHOWN_CHANGES).map((c) => (
+                  <Text key={`${c.date}#${c.order}`} style={[styles.body, text]}>
+                    {formatDateParent(c.date)}　{c.from ? labelOf(c.from) : '—'} → {c.to ? labelOf(c.to) : '—'}
+                  </Text>
+                ))}
+                {pending.changes.length > MAX_SHOWN_CHANGES && (
+                  <Text style={[styles.body, sub]}>{PARENT_TEXT.approvalMore(pending.changes.length - MAX_SHOWN_CHANGES)}</Text>
+                )}
+                <BigButton label={PARENT_TEXT.approvalApply} onPress={applyPending} />
+                <BigButton variant="secondary" label={PARENT_TEXT.approvalReject} onPress={() => commit({ ...data, pendingApproval: undefined })} />
+              </>
+            )}
+          </Section>
+        )}
+
+        <Section title={PARENT_TEXT.subjectsTitle} note={PARENT_TEXT.subjectsNote}>
+          {data.settings.subjects.map((s) => {
+            const label = subjectLabel(s, true);
+            // 最後の1教科はオフにできない（計画が空になるため）
+            const locked = s.enabled && enabledCount === 1;
+            return (
+              <View key={s.id} style={[styles.row, { borderColor: theme.border }]}>
+                <Text style={[styles.rowLabel, text]}>{label}</Text>
+                <Switch
+                  accessibilityLabel={label}
+                  value={s.enabled}
+                  disabled={locked}
+                  onValueChange={(v) =>
+                    updateSettings({ ...data.settings, subjects: setSubjectEnabled(data.settings.subjects, s.id, v) })
+                  }
+                />
+              </View>
+            );
+          })}
+          <Text style={[styles.body, text]}>{PARENT_TEXT.addSubjectLabel}</Text>
+          <View style={styles.addRow}>
+            <TextInput
+              value={newSubject}
+              onChangeText={(t) => setNewSubject(t.slice(0, MAX_SUBJECT_NAME))}
+              onSubmitEditing={addSubject}
+              placeholder={PARENT_TEXT.addSubjectPlaceholder}
+              placeholderTextColor={theme.textSecondary}
+              accessibilityLabel={PARENT_TEXT.addSubjectLabel}
+              style={[styles.input, text, { borderColor: theme.border, backgroundColor: theme.backgroundElement }]}
+            />
+            <BigButton variant="secondary" label={PARENT_TEXT.addSubject} onPress={addSubject} />
+          </View>
+        </Section>
+
+        <Section title={PARENT_TEXT.slotsTitle} note={PARENT_TEXT.slotsNote}>
+          {WEEKDAY_ORDER.map((day) => {
+            const name = WEEKDAY_NAMES[day];
+            const value = data.settings.slotsPerWeekday[day] ?? 0;
+            return (
+              <View key={day} style={[styles.row, { borderColor: theme.border }]}>
+                <Text style={[styles.rowLabel, text]}>{name}</Text>
+                <View style={styles.stepper}>
+                  <BigButton variant="secondary" label="−" accessibilityLabel={PARENT_TEXT.decrease(name)} onPress={() => setSlots(day, value - 1)} />
+                  <Text style={[styles.stepValue, text]}>{PARENT_TEXT.slotsValue(value)}</Text>
+                  <BigButton variant="secondary" label="＋" accessibilityLabel={PARENT_TEXT.increase(name)} onPress={() => setSlots(day, value + 1)} />
+                </View>
+              </View>
+            );
+          })}
+        </Section>
+
+        {data.parent && (
+          <Section title={PARENT_TEXT.approvalSettingTitle} note={PARENT_TEXT.approvalSettingNote}>
+            <View style={[styles.row, { borderColor: theme.border }]}>
+              <Text style={[styles.rowLabel, text]}>{PARENT_TEXT.approvalSettingTitle}</Text>
+              <Switch
+                accessibilityLabel={PARENT_TEXT.approvalSettingTitle}
+                value={data.parent.requireApproval}
+                onValueChange={(v) => data.parent && commit({ ...data, parent: { ...data.parent, requireApproval: v } })}
+              />
+            </View>
+          </Section>
+        )}
+
+        <BigButton
+          label={PARENT_TEXT.backToChild}
+          onPress={() => {
+            lockParent();
+            router.back();
+          }}
+        />
+      </ScrollView>
+    </SafeAreaView>
+  );
+}
+
+function Section({ title, note, children }: { title: string; note?: string; children: ReactNode }) {
+  const theme = useTheme();
+  return (
+    <View style={[styles.section, { backgroundColor: theme.backgroundElement }]}>
+      <Text accessibilityRole="header" style={[styles.sectionTitle, { color: theme.text }]}>
+        {title}
+      </Text>
+      {note && <Text style={[styles.note, { color: theme.textSecondary }]}>{note}</Text>}
+      {children}
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+  },
+  content: {
+    padding: Spacing.three,
+    gap: Spacing.three,
+    width: '100%',
+    maxWidth: MaxContentWidth,
+    alignSelf: 'center',
+  },
+  section: {
+    borderRadius: 16,
+    padding: Spacing.three,
+    gap: Spacing.two,
+  },
+  sectionTitle: {
+    fontSize: FontSize.heading - 4,
+    fontWeight: '700',
+  },
+  note: {
+    fontSize: 16,
+    lineHeight: 24,
+  },
+  body: {
+    fontSize: 16,
+    lineHeight: 24,
+  },
+  notice: {
+    fontSize: 16,
+    padding: Spacing.three,
+    borderRadius: 12,
+    overflow: 'hidden',
+  },
+  row: {
+    minHeight: MinTouchSize,
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: Spacing.two,
+    borderBottomWidth: 1,
+    paddingVertical: Spacing.one,
+  },
+  rowLabel: {
+    fontSize: FontSize.body,
+    flexShrink: 1,
+  },
+  addRow: {
+    flexDirection: 'row',
+    gap: Spacing.two,
+    alignItems: 'center',
+  },
+  input: {
+    flex: 1,
+    minHeight: MinTouchSize,
+    borderWidth: 2,
+    borderRadius: 12,
+    paddingHorizontal: Spacing.three,
+    fontSize: FontSize.body,
+  },
+  stepper: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.two,
+  },
+  stepValue: {
+    fontSize: FontSize.body,
+    minWidth: 48,
+    textAlign: 'center',
+  },
+});
