@@ -109,6 +109,20 @@ export function ensureMonthPlan(
   };
 }
 
+/**
+ * 計画を作り終えた月を、新しい設定で最初から作り直す。
+ * 最初の起動の設定（まだ記録が無いとき）だけに使う。記録があるときは applySettingsChange を使う。
+ */
+export function rebuildPlannedMonths(
+  settings: PlanSettings,
+  plannedMonths: readonly string[],
+): PlannedSlot[] {
+  return plannedMonths.flatMap((month) => {
+    const [year, m] = month.split('-').map(Number);
+    return buildMonthPlan(settings, year, m);
+  });
+}
+
 /** date より後で、予定がある最初の日の予定（無ければ空） */
 export function nextStudyDay(plan: readonly PlannedSlot[], date: DateKey): PlannedSlot[] {
   const next = plan

@@ -6,6 +6,7 @@ import {
   ensureMonthPlan,
   monthKeyOf,
   nextStudyDay,
+  rebuildPlannedMonths,
   removeRecord,
   removeRecordAt,
   setRecordMood,
@@ -124,6 +125,16 @@ describe('ensureMonthPlan', () => {
 
     const again = ensureMonthPlan(settings, first.plan, first.plannedMonths, '2027-02-20');
     expect(again.plan).toEqual(first.plan);
+  });
+});
+
+describe('rebuildPlannedMonths', () => {
+  test('新しい回数で、作り終えた月を最初から作り直す', () => {
+    const settings = createDefaultSettings();
+    const everyDay1 = { ...settings, slotsPerWeekday: { 0: 1, 1: 1, 2: 1, 3: 1, 4: 1, 5: 1, 6: 1 } };
+    const plan = rebuildPlannedMonths(everyDay1, ['2027-02']);
+    expect(plan).toHaveLength(28);
+    expect(plan.every((s) => monthKeyOf(s.date) === '2027-02')).toBe(true);
   });
 });
 

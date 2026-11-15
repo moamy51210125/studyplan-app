@@ -46,9 +46,10 @@ export default function ParentGateScreen() {
     setMessage(msg);
   };
 
-  const openParentMode = () => {
+  /** 最初の起動の設定なら、次は1日の回数を決める画面へ */
+  const openParentMode = (next: '/parent' | '/setup-slots' = '/parent') => {
     unlockParent();
-    router.replace('/parent');
+    router.replace(next);
   };
 
   const submit = () => {
@@ -93,7 +94,7 @@ export default function ParentGateScreen() {
             requireApproval: data.parent?.requireApproval ?? false,
           },
         });
-        openParentMode();
+        openParentMode(isSetup ? '/setup-slots' : '/parent');
         return;
       }
       case 'forgot':

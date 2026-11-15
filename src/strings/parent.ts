@@ -44,6 +44,11 @@ export const PARENT_TEXT = {
   slotsTitle: '曜日ごとの回数',
   slotsNote: '1日にいくつの教科を勉強するかです。変えると、明日以降の予定を作り直します。',
   slotsValue: (n: number) => `${n}回`,
+  weeklyTotal: (n: number) => `1週間で ${n}回`,
+  setupSlotsTitle: '1日の回数',
+  setupSlotsIntro:
+    'お子さまが1日にいくつの教科を勉強するかを、曜日ごとに決めてください。習い事のある日は少なめにするなど、ご家庭に合わせて調整できます。あとから保護者モードでいつでも変えられます。',
+  setupNext: '決定して次へ',
   decrease: (day: string) => `${day}の回数を減らす`,
   increase: (day: string) => `${day}の回数を増やす`,
 

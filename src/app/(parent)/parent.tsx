@@ -9,6 +9,7 @@ import { ExamsSection } from '@/components/parent/exams-section';
 import { GradeSection } from '@/components/parent/grade-section';
 import { RestDaysSection } from '@/components/parent/rest-days-section';
 import { Section } from '@/components/parent/section';
+import { SlotsEditor } from '@/components/parent/slots-editor';
 import { FontSize, MaxContentWidth, MinTouchSize, Spacing } from '@/constants/theme';
 import { useStudyData } from '@/hooks/use-study-data';
 import { useTheme } from '@/hooks/use-theme';
@@ -20,17 +21,10 @@ import {
   isApprovalStale,
   setSubjectEnabled,
 } from '@/planner';
-import {
-  formatDateParent,
-  MAX_SLOTS_PER_DAY,
-  PARENT_TEXT,
-  WEEKDAY_NAMES,
-} from '@/strings/parent';
+import { formatDateParent, PARENT_TEXT } from '@/strings/parent';
 import { subjectLabelForParent } from '@/strings/subjects';
-import type { PlanSettings, SubjectId, Weekday } from '@/types/plan';
+import type { PlanSettings, SubjectId } from '@/types/plan';
 
-/** 月曜から並べる */
-const WEEKDAY_ORDER: Weekday[] = [1, 2, 3, 4, 5, 6, 0];
 const MAX_SHOWN_CHANGES = 5;
 const MAX_SUBJECT_NAME = 12;
 
@@ -76,10 +70,6 @@ export default function ParentScreen() {
     setNewSubject('');
   };
 
-  const setSlots = (day: Weekday, value: number) => {
-    const n = Math.min(MAX_SLOTS_PER_DAY, Math.max(0, value));
-    updateSettings({ ...data.settings, slotsPerWeekday: { ...data.settings.slotsPerWeekday, [day]: n } });
-  };
 
   const text = { color: theme.text };
   const sub = { color: theme.textSecondary };
@@ -154,20 +144,10 @@ export default function ParentScreen() {
         </Section>
 
         <Section title={PARENT_TEXT.slotsTitle} note={PARENT_TEXT.slotsNote}>
-          {WEEKDAY_ORDER.map((day) => {
-            const name = WEEKDAY_NAMES[day];
-            const value = data.settings.slotsPerWeekday[day] ?? 0;
-            return (
-              <View key={day} style={[styles.row, { borderColor: theme.border }]}>
-                <Text style={[styles.rowLabel, text]}>{name}</Text>
-                <View style={styles.stepper}>
-                  <BigButton variant="secondary" label="−" accessibilityLabel={PARENT_TEXT.decrease(name)} onPress={() => setSlots(day, value - 1)} />
-                  <Text style={[styles.stepValue, text]}>{PARENT_TEXT.slotsValue(value)}</Text>
-                  <BigButton variant="secondary" label="＋" accessibilityLabel={PARENT_TEXT.increase(name)} onPress={() => setSlots(day, value + 1)} />
-                </View>
-              </View>
-            );
-          })}
+          <SlotsEditor
+            value={data.settings.slotsPerWeekday}
+            onChange={(slotsPerWeekday) => updateSettings({ ...data.settings, slotsPerWeekday })}
+          />
         </Section>
 
         <RestDaysSection settings={data.settings} today={today} onChange={updateSettings} />
@@ -255,15 +235,5 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     paddingHorizontal: Spacing.three,
     fontSize: FontSize.body,
-  },
-  stepper: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: Spacing.two,
-  },
-  stepValue: {
-    fontSize: FontSize.body,
-    minWidth: 48,
-    textAlign: 'center',
   },
 });
