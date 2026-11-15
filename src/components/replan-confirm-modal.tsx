@@ -12,6 +12,8 @@ const MAX_SHOWN = 5;
 
 interface ReplanConfirmModalProps {
   visible: boolean;
+  title: string;
+  body: string;
   changes: PlanChange[];
   labelOf: (id: SubjectId) => string;
   onAccept: () => void;
@@ -19,7 +21,15 @@ interface ReplanConfirmModalProps {
 }
 
 /** 組み直しの案を見せて「いいよ」「かえない」をえらんでもらう画面 */
-export function ReplanConfirmModal({ visible, changes, labelOf, onAccept, onKeep }: ReplanConfirmModalProps) {
+export function ReplanConfirmModal({
+  visible,
+  title,
+  body,
+  changes,
+  labelOf,
+  onAccept,
+  onKeep,
+}: ReplanConfirmModalProps) {
   const theme = useTheme();
   const shown = changes.slice(0, MAX_SHOWN);
   const rest = changes.length - shown.length;
@@ -30,9 +40,9 @@ export function ReplanConfirmModal({ visible, changes, labelOf, onAccept, onKeep
       <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
         <ScrollView contentContainerStyle={styles.content}>
           <Text accessibilityRole="header" style={[styles.title, { color: theme.text }]}>
-            {TODAY_TEXT.replanTitle}
+            {title}
           </Text>
-          <Text style={[styles.body, { color: theme.text }]}>{TODAY_TEXT.replanBody}</Text>
+          <Text style={[styles.body, { color: theme.text }]}>{body}</Text>
 
           {shown.map((c) => (
             <View

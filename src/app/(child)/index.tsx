@@ -26,8 +26,9 @@ import type { SubjectId } from '@/types/plan';
 export default function TodayScreen() {
   const theme = useTheme();
   const today = useToday();
-  const { data, commit, saveError } = useStudyData(today);
+  const { data, commit, saveError, missedReview, dismissMissedReview } = useStudyData(today);
   const [pickerOpen, setPickerOpen] = useState(false);
+  /** 「ちがう きょうかを やった」ときの組み直し案 */
   const [proposal, setProposal] = useState<ReplanResult | null>(null);
 
   const subjects = data?.settings.subjects;
@@ -56,6 +57,8 @@ export default function TodayScreen() {
 
   const pickOther = (id: SubjectId) => {
     setPickerOpen(false);
+    // この組み直しは、きのうまでの埋め合わせも含めて数え直すので、古い埋め合わせ案は捨てる
+    dismissMissedReview();
     const records = addRecord(data.records, today, id);
     commit({ ...data, records });
     // 組み直し案を作り、変わるところがあれば「いい？」と聞く（勝手に変えない）
@@ -63,9 +66,21 @@ export default function TodayScreen() {
     if (result.changes.length > 0) setProposal(result);
   };
 
-  const acceptReplan = () => {
-    if (proposal) commit({ ...data, plan: proposal.plan });
-    setProposal(null);
+  // 確認画面は一度に1つ。「ちがう きょうか」の案を優先し、なければ埋め合わせ案を出す
+  const active = proposal
+    ? { result: proposal, title: TODAY_TEXT.replanTitle, body: TODAY_TEXT.replanBody }
+    : missedReview && !pickerOpen
+      ? { result: missedReview, title: TODAY_TEXT.missedTitle, body: TODAY_TEXT.missedBody }
+      : null;
+
+  const closeProposal = () => {
+    if (proposal) setProposal(null);
+    else dismissMissedReview();
+  };
+
+  const acceptProposal = () => {
+    if (active) commit({ ...data, plan: active.result.plan });
+    closeProposal();
   };
 
   return (
@@ -141,11 +156,13 @@ export default function TodayScreen() {
         onCancel={() => setPickerOpen(false)}
       />
       <ReplanConfirmModal
-        visible={proposal !== null}
-        changes={proposal?.changes ?? []}
+        visible={active !== null}
+        title={active?.title ?? ''}
+        body={active?.body ?? ''}
+        changes={active?.result.changes ?? []}
         labelOf={labelOf}
-        onAccept={acceptReplan}
-        onKeep={() => setProposal(null)}
+        onAccept={acceptProposal}
+        onKeep={closeProposal}
       />
     </SafeAreaView>
   );

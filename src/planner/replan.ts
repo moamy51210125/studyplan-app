@@ -44,6 +44,21 @@ export function replan({ settings, currentPlan, records, today }: ReplanInput): 
   return { plan, changes: diffPlans(currentPlan, plan) };
 }
 
+/**
+ * その日はじめてアプリを開いたときの見直し。
+ * 昨日までの実際の記録で数え直し、今日から月末までの組み直し案を作る。
+ * （やらなかった予定の分が、これからの予定に入る）
+ * 月が変わった日は、前の月の分は持ちこさないので変更は出ない。
+ */
+export function reviewMissed({
+  settings,
+  currentPlan,
+  records,
+  today,
+}: ReplanInput): ReplanResult {
+  return replan({ settings, currentPlan, records, today: addDays(today, -1) });
+}
+
 /** 2つの計画を比べて、変わった枠を返す */
 export function diffPlans(before: readonly PlannedSlot[], after: readonly PlannedSlot[]): PlanChange[] {
   const key = (s: PlannedSlot) => `${s.date}#${s.order}`;

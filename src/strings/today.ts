@@ -20,6 +20,8 @@ export const TODAY_TEXT = {
   replanOk: 'いいよ',
   replanKeep: 'かえない',
   replanMore: (n: number) => `ほかに ${n}こ かわるよ`,
+  missedTitle: 'できなかった きょうかが あるよ',
+  missedBody: 'きのうまでに できなかった ぶんを、これからの よていに いれるね。こう かえても いい？',
   saveError: 'きろくが うまく できなかったよ。もう いちど おしてね',
   a11yDone: (subject: string) => `${subject}、できた`,
   a11yDoneState: (subject: string) => `${subject}、できました`,

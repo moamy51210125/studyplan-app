@@ -1,6 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-import type { PlannedSlot, PlanSettings, StudyRecord } from '@/types/plan';
+import type { DateKey, PlannedSlot, PlanSettings, StudyRecord } from '@/types/plan';
 
 /**
  * 端末の中に保存するデータ。端末の外には送らない（.claude/rules/child-privacy.md）。
@@ -13,6 +13,8 @@ export interface AppData {
   /** 計画を作り終えた月（'YYYY-MM'） */
   plannedMonths: string[];
   records: StudyRecord[];
+  /** 最後にアプリを開いた日（その日はじめて開いたときの見直しに使う） */
+  lastOpenedDate?: DateKey;
 }
 
 const STORAGE_KEY = 'studyplan/app-data';

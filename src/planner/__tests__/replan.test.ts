@@ -2,7 +2,7 @@ import { describe, expect, test } from '@jest/globals';
 import type { PlanSettings, StudyRecord } from '@/types/plan';
 import { buildMonthPlan, countBySubject } from '../build-plan';
 import { createDefaultSettings } from '../defaults';
-import { diffPlans, replan } from '../replan';
+import { diffPlans, replan, reviewMissed } from '../replan';
 
 const ALL = ['sansu', 'kokugo', 'rika', 'shakai', 'eigo', 'kanken', 'eiken'];
 
@@ -63,6 +63,37 @@ describe('replan: 予定と違う教科をしたとき', () => {
 
   test('月末の日に組み直しても、変わる枠はない', () => {
     const r = replan({ settings, currentPlan: plan, records: [], today: '2027-02-28' });
+    expect(r.changes).toEqual([]);
+  });
+});
+
+describe('reviewMissed: やらなかった予定の埋め合わせ', () => {
+  const settings = allSubjectsSettings();
+  const plan = buildMonthPlan(settings, 2027, 2);
+  const day1 = plan.filter((s) => s.date === '2027-02-01').map((s) => s.subjectId);
+
+  test('きのうの予定をやらなかったら、今日から月末で埋め合わせる', () => {
+    // 2/1 は1つめだけやって、2つめはやらなかった
+    const records: StudyRecord[] = [{ date: '2027-02-01', subjectId: day1[0] }];
+    const r = reviewMissed({ settings, currentPlan: plan, records, today: '2027-02-02' });
+
+    expect(r.changes.length).toBeGreaterThan(0);
+    expect(r.changes.every((c) => c.date >= '2027-02-02')).toBe(true);
+    const fromToday = r.plan.filter((s) => s.date >= '2027-02-02');
+    const counts = countBySubject([...records, ...fromToday]);
+    // 枠が1つ減った分、1教科だけ7回、ほかは8回
+    expect(Object.values(counts).sort()).toEqual([7, 8, 8, 8, 8, 8, 8]);
+    expect(counts[day1[1]]).toBe(8);
+  });
+
+  test('きのうまで予定どおりなら、何も変わらない', () => {
+    const records = day1.map((subjectId) => ({ date: '2027-02-01', subjectId }));
+    expect(reviewMissed({ settings, currentPlan: plan, records, today: '2027-02-02' }).changes).toEqual([]);
+  });
+
+  test('月が変わった日は、前の月の分を持ちこさない', () => {
+    const march = buildMonthPlan(settings, 2027, 3);
+    const r = reviewMissed({ settings, currentPlan: [...plan, ...march], records: [], today: '2027-03-01' });
     expect(r.changes).toEqual([]);
   });
 });
