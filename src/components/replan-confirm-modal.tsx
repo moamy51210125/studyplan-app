@@ -4,7 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { BigButton } from '@/components/big-button';
 import { FontSize, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
-import { formatDateShort, TODAY_TEXT } from '@/strings/today';
+import { useTodayText } from '@/hooks/use-today-text';
 import type { PlanChange, SubjectId } from '@/types/plan';
 
 /** 一度に見せる変更の数（多すぎると子どもが読みきれない） */
@@ -31,6 +31,7 @@ export function ReplanConfirmModal({
   onKeep,
 }: ReplanConfirmModalProps) {
   const theme = useTheme();
+  const t = useTodayText();
   const shown = changes.slice(0, MAX_SHOWN);
   const rest = changes.length - shown.length;
   const name = (id: SubjectId | null) => (id === null ? '—' : labelOf(id));
@@ -48,18 +49,18 @@ export function ReplanConfirmModal({
             <View
               key={`${c.date}#${c.order}`}
               style={[styles.row, { backgroundColor: theme.backgroundElement, borderColor: theme.border }]}>
-              <Text style={[styles.date, { color: theme.textSecondary }]}>{formatDateShort(c.date)}</Text>
+              <Text style={[styles.date, { color: theme.textSecondary }]}>{t.dateShort(c.date)}</Text>
               <Text style={[styles.change, { color: theme.text }]}>
                 {name(c.from)} → {name(c.to)}
               </Text>
             </View>
           ))}
           {rest > 0 && (
-            <Text style={[styles.body, { color: theme.textSecondary }]}>{TODAY_TEXT.replanMore(rest)}</Text>
+            <Text style={[styles.body, { color: theme.textSecondary }]}>{t.replanMore(rest)}</Text>
           )}
 
-          <BigButton label={TODAY_TEXT.replanOk} onPress={onAccept} />
-          <BigButton variant="secondary" label={TODAY_TEXT.replanKeep} onPress={onKeep} />
+          <BigButton label={t.replanOk} onPress={onAccept} />
+          <BigButton variant="secondary" label={t.replanKeep} onPress={onKeep} />
         </ScrollView>
       </SafeAreaView>
     </Modal>

@@ -3,7 +3,7 @@ import { StyleSheet, Text, View } from 'react-native';
 import { BigButton } from '@/components/big-button';
 import { FontSize, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
-import { TODAY_TEXT } from '@/strings/today';
+import { useTodayText } from '@/hooks/use-today-text';
 
 interface SubjectCardProps {
   label: string;
@@ -16,6 +16,7 @@ interface SubjectCardProps {
 /** 教科1つ分のカード。できたかどうかは色だけでなく文字と ✓ でも示す */
 export function SubjectCard({ label, done, onDone, onUndo }: SubjectCardProps) {
   const theme = useTheme();
+  const t = useTodayText();
   return (
     <View
       style={[
@@ -27,25 +28,25 @@ export function SubjectCard({ label, done, onDone, onUndo }: SubjectCardProps) {
       ]}>
       <Text
         style={[styles.label, { color: theme.text }]}
-        accessibilityLabel={done ? TODAY_TEXT.a11yDoneState(label) : label}>
+        accessibilityLabel={done ? t.a11yDoneState(label) : label}>
         {label}
       </Text>
 
       {done ? (
         <View style={styles.doneRow}>
-          <Text style={[styles.badge, { color: theme.success }]}>✓ {TODAY_TEXT.doneBadge}</Text>
+          <Text style={[styles.badge, { color: theme.success }]}>✓ {t.doneBadge}</Text>
           <BigButton
             variant="quiet"
-            label={TODAY_TEXT.undo}
-            accessibilityLabel={TODAY_TEXT.a11yUndo(label)}
+            label={t.undo}
+            accessibilityLabel={t.a11yUndo(label)}
             onPress={onUndo}
           />
         </View>
       ) : (
         onDone && (
           <BigButton
-            label={TODAY_TEXT.doneButton}
-            accessibilityLabel={TODAY_TEXT.a11yDone(label)}
+            label={t.doneButton}
+            accessibilityLabel={t.a11yDone(label)}
             onPress={onDone}
           />
         )

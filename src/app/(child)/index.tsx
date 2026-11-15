@@ -23,12 +23,13 @@ import {
   upcomingExams,
 } from '@/planner';
 import { examGradeForChild, subjectLabelForChild } from '@/strings/subjects';
-import { formatDateLong, formatDateShort, TODAY_TEXT } from '@/strings/today';
+import { useTodayText } from '@/hooks/use-today-text';
 import type { SubjectId } from '@/types/plan';
 
 /** 子ども用：きょうの やること */
 export default function TodayScreen() {
   const theme = useTheme();
+  const t = useTodayText();
   const { today, data, commit, saveError, missedReview, dismissMissedReview } = useStudyData();
   const [pickerOpen, setPickerOpen] = useState(false);
   /** 「ちがう きょうかを やった」ときの組み直し案 */
@@ -48,7 +49,7 @@ export default function TodayScreen() {
   if (!data) {
     return (
       <SafeAreaView style={[styles.center, { backgroundColor: theme.background }]}>
-        <Text style={[styles.body, { color: theme.text }]}>{TODAY_TEXT.loading}</Text>
+        <Text style={[styles.body, { color: theme.text }]}>{t.loading}</Text>
       </SafeAreaView>
     );
   }
@@ -77,9 +78,9 @@ export default function TodayScreen() {
 
   // 確認画面は一度に1つ。「ちがう きょうか」の案を優先し、なければ埋め合わせ案を出す
   const active = proposal
-    ? { result: proposal, title: TODAY_TEXT.replanTitle, body: TODAY_TEXT.replanBody }
+    ? { result: proposal, title: t.replanTitle, body: t.replanBody }
     : missedReview && !pickerOpen
-      ? { result: missedReview, title: TODAY_TEXT.missedTitle, body: TODAY_TEXT.missedBody }
+      ? { result: missedReview, title: t.missedTitle, body: t.missedBody }
       : null;
 
   const closeProposal = () => {
@@ -106,14 +107,14 @@ export default function TodayScreen() {
   return (
     <SafeAreaView style={[styles.safeArea, { backgroundColor: theme.background }]}>
       <ScrollView contentContainerStyle={styles.content}>
-        <Text style={[styles.date, { color: theme.textSecondary }]}>{formatDateLong(today)}</Text>
+        <Text style={[styles.date, { color: theme.textSecondary }]}>{t.dateLong(today)}</Text>
         <Text accessibilityRole="header" style={[styles.title, { color: theme.text }]}>
-          {TODAY_TEXT.title}
+          {t.title}
         </Text>
 
         {saveError && (
           <Text accessibilityRole="alert" style={[styles.body, { color: theme.text }]}>
-            {TODAY_TEXT.saveError}
+            {t.saveError}
           </Text>
         )}
 
@@ -128,8 +129,8 @@ export default function TodayScreen() {
               <Text style={[styles.bannerText, { color: theme.text }]}>
                 🎯{' '}
                 {days === 0
-                  ? TODAY_TEXT.examToday(name, examGrade)
-                  : TODAY_TEXT.examCountdown(name, examGrade, days)}
+                  ? t.examToday(name, examGrade)
+                  : t.examCountdown(name, examGrade, days)}
               </Text>
             </View>
           );
@@ -137,22 +138,22 @@ export default function TodayScreen() {
 
         {waitingApproval && (
           <View style={[styles.banner, { backgroundColor: theme.backgroundElement }]}>
-            <Text style={[styles.body, { color: theme.text }]}>⏳ {TODAY_TEXT.waitingApproval}</Text>
+            <Text style={[styles.body, { color: theme.text }]}>⏳ {t.waitingApproval}</Text>
           </View>
         )}
 
         {status.allDone && (
           <View style={[styles.banner, { backgroundColor: theme.successBackground }]}>
-            <Text style={[styles.bannerText, { color: theme.success }]}>🌟 {TODAY_TEXT.allDone}</Text>
+            <Text style={[styles.bannerText, { color: theme.success }]}>🌟 {t.allDone}</Text>
           </View>
         )}
 
         {status.items.length === 0 ? (
           <View style={[styles.banner, { backgroundColor: theme.backgroundElement }]}>
-            <Text style={[styles.body, { color: theme.text }]}>{TODAY_TEXT.noPlanToday}</Text>
+            <Text style={[styles.body, { color: theme.text }]}>{t.noPlanToday}</Text>
             {next.length > 0 && (
               <Text style={[styles.body, { color: theme.textSecondary }]}>
-                {TODAY_TEXT.nextPlan(formatDateShort(next[0].date))}：
+                {t.nextPlan(t.dateShort(next[0].date))}：
                 {next.map((s) => labelOf(s.subjectId)).join('・')}
               </Text>
             )}
@@ -172,7 +173,7 @@ export default function TodayScreen() {
         {status.extras.length > 0 && (
           <>
             <Text accessibilityRole="header" style={[styles.subheading, { color: theme.text }]}>
-              {TODAY_TEXT.extrasTitle}
+              {t.extrasTitle}
             </Text>
             {status.extras.map((r, i) => (
               <SubjectCard
@@ -188,7 +189,7 @@ export default function TodayScreen() {
         <View style={styles.spacer} />
         <BigButton
           variant="secondary"
-          label={TODAY_TEXT.otherSubjectButton}
+          label={t.otherSubjectButton}
           onPress={() => setPickerOpen(true)}
         />
 
@@ -196,7 +197,7 @@ export default function TodayScreen() {
         <View style={styles.parentEntry}>
           <BigButton
             variant="quiet"
-            label={TODAY_TEXT.parentEntry}
+            label={t.parentEntry}
             onPress={() => router.push('/parent-gate')}
           />
         </View>
