@@ -140,9 +140,10 @@ assets/           アイコン・画像
 - 書き出す：`createBackupText` で JSON を作り、端末の一時フォルダに書いて `expo-sharing` の「共有」で保護者が保存先を選ぶ。アプリ自体は外部に通信しない
 - 読み込む：`File.pickFileAsync`（expo-file-system）でファイルを選び、`parseBackupText` で確かめてから、確認ダイアログのあとに今のデータを置きかえる（暗証番号もふくめて戻る）
   - `expo-document-picker` は使わない：選んだファイルを Expo Go 全体の一時フォルダにコピーするため、Android の Expo Go では「Missing 'READ' permission」で読めなかった（2026-11-15 実機で確認）
+  - `File.pickFileAsync` に変えたあと、Android の Expo Go で書き出し→読み込みが成功（2026-11-15 ユーザーが実機で確認）
 - バックアップには子どもの学習記録と設定がふくまれる。保存先に注意するよう画面に書いている
 - 形を変えるときは `BACKUP_VERSION` を上げ、古い形からの読み込みを用意する
-- 使うパッケージ：`expo-file-system` / `expo-sharing` / `expo-document-picker`（Expo 公式、2026-11-15 追加）
+- 使うパッケージ：`expo-file-system` / `expo-sharing`（Expo 公式、2026-11-15 追加）。`expo-document-picker` は使わなくなったので外した
 
 ### 見た目（色）
 
