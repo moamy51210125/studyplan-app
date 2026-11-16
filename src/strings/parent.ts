@@ -94,6 +94,14 @@ export const PARENT_TEXT = {
   restMark: '休',
   restA11y: (date: string, on: boolean) => `${date}${on ? '、お休み' : ''}`,
   restCount: (n: number) => `お休みの日：${n}日`,
+  restModeDay: '1日ずつ',
+  restModePeriod: '期間でまとめて',
+  rangeStartHint: '始まりの日をタップしてください。',
+  rangeEndHint: (date: string) => `始まり：${date}。終わりの日をタップしてください。`,
+  rangeStartMark: '始',
+  rangeCancel: 'えらび直す',
+  restRangeAdded: (from: string, to: string) => `${from}〜${to}をお休みにしました。`,
+  restRangeRemoved: (from: string, to: string) => `${from}〜${to}のお休みを外しました。`,
 
   examsTitle: '試験日（漢検・英検）',
   examsNote:
@@ -121,6 +129,13 @@ export const PARENT_TEXT = {
   homeworkRemove: '削除',
   homeworkRemoveA11y: (name: string) => `宿題「${name}」を削除`,
   homeworkNone: '登録されている宿題はありません。',
+  breaksTitle: '学校のお休み（夏休みなど）',
+  breaksNote:
+    'この期間は宿題を出しません。勉強の予定はそのまま続きます（予定もお休みにしたいときは「お休みの日」を使ってください）。',
+  breaksAdd: '学校のお休みを追加',
+  breakItem: (from: string, to: string) => `${from}〜${to}`,
+  breakRemoveA11y: (from: string, to: string) => `${from}〜${to}の学校のお休みを削除`,
+  breakMark: '休',
 
   gradeTitle: '学年',
   gradeNote:

@@ -85,3 +85,9 @@ export interface HomeworkCheck {
   date: DateKey;
   homeworkId: string;
 }
+
+/** 日付の期間（両端をふくむ） */
+export interface DateRange {
+  from: DateKey;
+  to: DateKey;
+}

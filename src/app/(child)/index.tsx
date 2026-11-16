@@ -79,7 +79,12 @@ export default function TodayScreen() {
   const next = status.items.length === 0 ? nextStudyDay(data.plan, today) : [];
   // 学校の宿題（月〜金。計画とは別に、いちばん上に出す）
   const checks = data.homeworkChecks ?? [];
-  const homework = homeworkForDay(data.homework ?? [], today, data.settings.restDays).map((h) => ({
+  const homework = homeworkForDay(
+    data.homework ?? [],
+    today,
+    data.settings.restDays,
+    data.schoolBreaks ?? [],
+  ).map((h) => ({
     ...h,
     done: isHomeworkDone(checks, today, h.id),
   }));

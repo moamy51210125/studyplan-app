@@ -4,6 +4,7 @@ import type { Appearance } from '@/constants/theme';
 import type { PendingApproval } from '@/planner/approval';
 import type {
   DateKey,
+  DateRange,
   HomeworkCheck,
   HomeworkItem,
   PlannedSlot,
@@ -46,6 +47,8 @@ export interface AppData {
   homework?: HomeworkItem[];
   /** 宿題のチェック */
   homeworkChecks?: HomeworkCheck[];
+  /** 学校のお休み（夏休みなど）。宿題を出さない（勉強の予定はそのまま） */
+  schoolBreaks?: DateRange[];
 }
 
 export interface ParentSettings {

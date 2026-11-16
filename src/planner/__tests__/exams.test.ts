@@ -1,7 +1,7 @@
 import { describe, expect, test } from '@jest/globals';
 import { examGradeForChild, subjectLabelForChild, subjectLabelForParent } from '@/strings/subjects';
 import { createDefaultSettings } from '../defaults';
-import { addExam, removeExam, toggleRestDay, upcomingExams } from '../exams';
+import { addExam, orderedRange, removeExam, toggleRestDay, toggleRestRange, upcomingExams } from '../exams';
 
 describe('試験日', () => {
   test('追加すると、その教科がオンになり、日付順に並ぶ', () => {
@@ -63,5 +63,18 @@ describe('学年による教科名', () => {
 
   test('級はひらがなにする', () => {
     expect(examGradeForChild('準2級')).toBe('じゅん2きゅう');
+  });
+});
+
+describe('お休みを期間でまとめて', () => {
+  test('期間の日をすべてお休みにし、もう一度えらぶと外れる', () => {
+    const s = { ...createDefaultSettings(), restDays: ['2027-02-03'] };
+    const range = orderedRange('2027-02-05', '2027-02-02'); // 後の日を先にえらんでもよい
+    const on = toggleRestRange(s, range);
+    expect(on.added).toBe(true);
+    expect(on.settings.restDays).toEqual(['2027-02-02', '2027-02-03', '2027-02-04', '2027-02-05']);
+    const off = toggleRestRange(on.settings, range);
+    expect(off.added).toBe(false);
+    expect(off.settings.restDays).toEqual([]);
   });
 });

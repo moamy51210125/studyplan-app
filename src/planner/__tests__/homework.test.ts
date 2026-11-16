@@ -1,5 +1,13 @@
 import { describe, expect, test } from '@jest/globals';
-import { addHomework, homeworkForDay, isHomeworkDone, removeHomework, setHomeworkDone } from '../homework';
+import {
+  addHomework,
+  addSchoolBreak,
+  homeworkForDay,
+  isHomeworkDone,
+  removeHomework,
+  removeSchoolBreak,
+  setHomeworkDone,
+} from '../homework';
 
 const items = [
   { id: 'hw-1', label: 'けいさんドリル' },
@@ -44,5 +52,25 @@ describe('addHomework / removeHomework', () => {
       items: [items[1]],
       checks: [checks[1]],
     });
+  });
+});
+
+describe('学校のお休み', () => {
+  const summer = { from: '2027-07-21', to: '2027-08-31' };
+
+  test('期間中の平日は宿題が出ない。前後は出る', () => {
+    expect(homeworkForDay(items, '2027-07-21', [], [summer])).toEqual([]); // 水曜
+    expect(homeworkForDay(items, '2027-08-31', [], [summer])).toEqual([]); // 火曜
+    expect(homeworkForDay(items, '2027-07-20', [], [summer])).toEqual(items);
+    expect(homeworkForDay(items, '2027-09-01', [], [summer])).toEqual(items);
+  });
+
+  test('日付順に足し、同じ期間は二重に足さない。消せる', () => {
+    const winter = { from: '2027-12-24', to: '2028-01-07' };
+    let breaks = addSchoolBreak([], winter);
+    breaks = addSchoolBreak(breaks, summer);
+    breaks = addSchoolBreak(breaks, summer);
+    expect(breaks).toEqual([summer, winter]);
+    expect(removeSchoolBreak(breaks, summer)).toEqual([winter]);
   });
 });

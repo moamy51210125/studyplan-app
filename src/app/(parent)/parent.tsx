@@ -129,6 +129,9 @@ export default function ParentScreen() {
           items={data.homework ?? []}
           checks={data.homeworkChecks ?? []}
           onChange={(homework, homeworkChecks) => commit({ ...data, homework, homeworkChecks })}
+          breaks={data.schoolBreaks ?? []}
+          today={today}
+          onChangeBreaks={(schoolBreaks) => commit({ ...data, schoolBreaks })}
         />
 
         <Section title={PARENT_TEXT.subjectsTitle} note={PARENT_TEXT.subjectsNote}>

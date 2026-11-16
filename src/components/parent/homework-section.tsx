@@ -2,13 +2,14 @@ import { useState } from 'react';
 import { StyleSheet, Text, TextInput, View } from 'react-native';
 
 import { BigButton } from '@/components/big-button';
+import { RangePicker } from '@/components/parent/range-picker';
 import { parentStyles, Section } from '@/components/parent/section';
 import { FontSize, MinTouchSize, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
-import { addHomework, removeHomework } from '@/planner';
+import { addHomework, addSchoolBreak, isInRanges, removeHomework, removeSchoolBreak } from '@/planner';
 import { cleanLabel } from '@/strings/subjects';
-import { PARENT_TEXT } from '@/strings/parent';
-import type { HomeworkCheck, HomeworkItem } from '@/types/plan';
+import { formatDateParent, PARENT_TEXT } from '@/strings/parent';
+import type { DateKey, DateRange, HomeworkCheck, HomeworkItem } from '@/types/plan';
 
 const MAX_HOMEWORK_NAME = 16;
 
@@ -16,12 +17,19 @@ interface Props {
   items: readonly HomeworkItem[];
   checks: readonly HomeworkCheck[];
   onChange: (items: HomeworkItem[], checks: HomeworkCheck[]) => void;
+  /** 学校のお休み（夏休みなど） */
+  breaks: readonly DateRange[];
+  today: DateKey;
+  onChangeBreaks: (breaks: DateRange[]) => void;
 }
 
 /** 学校の宿題（保護者が子どもと相談して登録する。月〜金に毎日出る） */
-export function HomeworkSection({ items, checks, onChange }: Props) {
+export function HomeworkSection({ items, checks, onChange, breaks, today, onChangeBreaks }: Props) {
   const theme = useTheme();
   const [name, setName] = useState('');
+  const [pickingBreak, setPickingBreak] = useState(false);
+  // 終わった学校のお休みは出さない
+  const shownBreaks = breaks.filter((b) => b.to >= today);
   const text = { color: theme.text };
 
   const add = () => {
@@ -66,6 +74,45 @@ export function HomeworkSection({ items, checks, onChange }: Props) {
         />
         <BigButton variant="secondary" label={PARENT_TEXT.homeworkAdd} onPress={add} />
       </View>
+
+      {/* 学校のお休み（夏休みなど）：宿題だけを止める */}
+      <Text accessibilityRole="header" style={[styles.subTitle, text]}>
+        {PARENT_TEXT.breaksTitle}
+      </Text>
+      <Text style={[parentStyles.body, { color: theme.textSecondary }]}>{PARENT_TEXT.breaksNote}</Text>
+      {shownBreaks.map((b) => {
+        const from = formatDateParent(b.from);
+        const to = formatDateParent(b.to);
+        return (
+          <View key={`${b.from}-${b.to}`} style={[styles.row, { borderColor: theme.border }]}>
+            <Text style={[styles.rowLabel, text]}>{PARENT_TEXT.breakItem(from, to)}</Text>
+            <BigButton
+              variant="quiet"
+              label={PARENT_TEXT.homeworkRemove}
+              accessibilityLabel={PARENT_TEXT.breakRemoveA11y(from, to)}
+              onPress={() => onChangeBreaks(removeSchoolBreak(breaks, b))}
+            />
+          </View>
+        );
+      })}
+      {pickingBreak ? (
+        <>
+          <RangePicker
+            today={today}
+            minDate={today}
+            isMarked={(d) => isInRanges(d, breaks)}
+            markLabel={PARENT_TEXT.breakMark}
+            a11yLabel={PARENT_TEXT.restA11y}
+            onPick={(range) => {
+              onChangeBreaks(addSchoolBreak(breaks, range));
+              setPickingBreak(false);
+            }}
+          />
+          <BigButton variant="secondary" label={PARENT_TEXT.cancel} onPress={() => setPickingBreak(false)} />
+        </>
+      ) : (
+        <BigButton variant="secondary" label={PARENT_TEXT.breaksAdd} onPress={() => setPickingBreak(true)} />
+      )}
     </Section>
   );
 }
@@ -80,6 +127,11 @@ const styles = StyleSheet.create({
     gap: Spacing.two,
     borderBottomWidth: 1,
     paddingVertical: Spacing.one,
+  },
+  subTitle: {
+    fontSize: FontSize.body,
+    fontWeight: '700',
+    marginTop: Spacing.two,
   },
   rowLabel: {
     fontSize: FontSize.body,

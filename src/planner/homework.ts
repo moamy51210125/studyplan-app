@@ -1,10 +1,11 @@
-import type { DateKey, HomeworkCheck, HomeworkItem } from '@/types/plan';
+import type { DateKey, DateRange, HomeworkCheck, HomeworkItem } from '@/types/plan';
 import { weekdayOf } from './dates';
 
 /**
  * 学校の宿題わく（ユーザー決定 2026-11-15）。
  * - 宿題は保護者が子どもと相談して決め、月〜金に毎日出す
- * - お休みの日（体調不良・行事）には出さない
+ * - お休みの日（体調不良・行事）と、学校のお休み（夏休みなど）には出さない
+ *   学校のお休みは宿題を出さないだけで、勉強の予定はそのまま
  * - 計画の枠とは別あつかいで、組み直しにも、ふりかえりの数にも入れない
  */
 export const HOMEWORK_WEEKDAYS: readonly number[] = [1, 2, 3, 4, 5];
@@ -14,10 +15,26 @@ export function homeworkForDay(
   items: readonly HomeworkItem[],
   date: DateKey,
   restDays: readonly DateKey[],
+  schoolBreaks: readonly DateRange[] = [],
 ): HomeworkItem[] {
   if (!HOMEWORK_WEEKDAYS.includes(weekdayOf(date))) return [];
   if (restDays.includes(date)) return [];
+  if (isInRanges(date, schoolBreaks)) return [];
   return [...items];
+}
+
+export function isInRanges(date: DateKey, ranges: readonly DateRange[]): boolean {
+  return ranges.some((r) => r.from <= date && date <= r.to);
+}
+
+/** 学校のお休みを足す（日付順） */
+export function addSchoolBreak(breaks: readonly DateRange[], range: DateRange): DateRange[] {
+  if (breaks.some((b) => b.from === range.from && b.to === range.to)) return [...breaks];
+  return [...breaks, range].sort((a, b) => (a.from < b.from ? -1 : a.from > b.from ? 1 : 0));
+}
+
+export function removeSchoolBreak(breaks: readonly DateRange[], range: DateRange): DateRange[] {
+  return breaks.filter((b) => !(b.from === range.from && b.to === range.to));
 }
 
 export function isHomeworkDone(checks: readonly HomeworkCheck[], date: DateKey, id: string): boolean {

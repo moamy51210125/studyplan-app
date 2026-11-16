@@ -17,6 +17,8 @@ interface MonthCalendarProps {
   isMarked: (date: DateKey) => boolean;
   /** 印の文字（色だけに頼らず、文字でも示す） */
   markLabel: string;
+  /** 日ごとに印の文字を変えたいとき（無ければ markLabel） */
+  markLabelOf?: (date: DateKey) => string | undefined;
   isDisabled: (date: DateKey) => boolean;
   onPressDay: (date: DateKey) => void;
   a11yLabel: (date: string, marked: boolean) => string;
@@ -30,6 +32,7 @@ export function MonthCalendar({
   minMonth,
   isMarked,
   markLabel,
+  markLabelOf,
   isDisabled,
   onPressDay,
   a11yLabel,
@@ -89,7 +92,9 @@ export function MonthCalendar({
               <Text style={[styles.dayNumber, { color: marked ? theme.onTint : theme.text }]}>
                 {Number(date.slice(8))}
               </Text>
-              {marked && <Text style={[styles.mark, { color: theme.onTint }]}>{markLabel}</Text>}
+              {marked && (
+                <Text style={[styles.mark, { color: theme.onTint }]}>{markLabelOf?.(date) ?? markLabel}</Text>
+              )}
             </Pressable>
           );
         })}
