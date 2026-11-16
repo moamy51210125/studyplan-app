@@ -43,6 +43,7 @@ export function SubjectCard({ label, done, onDone, onUndo, mood, onMood, kind = 
         {
           backgroundColor: done ? theme.successBackground : theme.backgroundElement,
           borderColor: done ? theme.success : theme.border,
+          borderWidth: done ? 3 : 2,
         },
       ]}>
       <View style={styles.topRow}>
@@ -54,7 +55,9 @@ export function SubjectCard({ label, done, onDone, onUndo, mood, onMood, kind = 
 
         {done ? (
           <View style={styles.doneRow}>
-            <RubyText style={[styles.badge, { color: theme.success }]}>{`✓ ${t.doneBadge}`}</RubyText>
+            <RubyText style={[styles.badge, { color: theme.onSuccess, backgroundColor: theme.success }]}>
+              {`✓ ${t.doneBadge}`}
+            </RubyText>
             <BigButton
               variant="quiet"
               label={t.undo}
@@ -115,9 +118,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: Spacing.two,
   },
+  // 明るいオレンジのぬりに、紺の文字のバッジ
   badge: {
     fontSize: FontSize.button,
     fontWeight: '700',
+    paddingHorizontal: Spacing.three,
+    paddingVertical: Spacing.one,
+    borderRadius: 999,
+    overflow: 'hidden',
   },
   moodArea: {
     gap: Spacing.two,

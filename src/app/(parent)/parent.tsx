@@ -82,7 +82,7 @@ export default function ParentScreen() {
       <Stack.Screen options={{ headerShown: true, title: PARENT_TEXT.homeTitle }} />
       <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
         {notice !== '' && (
-          <Text accessibilityRole="alert" style={[styles.notice, { color: theme.success, backgroundColor: theme.successBackground }]}>
+          <Text accessibilityRole="alert" style={[styles.notice, { color: theme.text, backgroundColor: theme.successBackground }]}>
             {notice}
           </Text>
         )}

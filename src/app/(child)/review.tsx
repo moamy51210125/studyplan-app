@@ -65,13 +65,13 @@ export default function ReviewScreen() {
         </View>
 
         {/* 予定のうち、できた数（大きな数字） */}
-        <View style={[styles.card, { backgroundColor: theme.successBackground }]}>
+        <View style={[styles.card, styles.doneCard, { backgroundColor: theme.successBackground, borderColor: theme.success }]}>
           <RubyText style={[styles.cardTitle, text]}>{t.doneHeadline}</RubyText>
           {summary.planned === 0 ? (
             <RubyText style={[styles.body, text]}>{t.noPlanInRange}</RubyText>
           ) : (
             <View accessible accessibilityLabel={t.a11yDoneOf(summary.doneOfPlanned, summary.planned)}>
-              <Text style={[styles.hero, { color: theme.success }]}>
+              <Text style={[styles.hero, text]}>
                 {summary.doneOfPlanned}
                 <Text style={[styles.heroSub, sub]}> / {summary.planned}</Text>
               </Text>
@@ -118,10 +118,10 @@ export default function ReviewScreen() {
                   )}
                 </View>
                 {p.over > 0 && (
-                  <RubyText style={[styles.body, { color: theme.success }]}>{t.balanceOver(p.over)}</RubyText>
+                  <RubyText style={[styles.body, text]}>{`🎉 ${t.balanceOver(p.over)}`}</RubyText>
                 )}
                 {p.unplanned && (
-                  <RubyText style={[styles.body, { color: theme.success }]}>{t.balanceUnplanned}</RubyText>
+                  <RubyText style={[styles.body, text]}>{`🎉 ${t.balanceUnplanned}`}</RubyText>
                 )}
               </View>
             );
@@ -183,6 +183,9 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     padding: Spacing.three,
     gap: Spacing.three,
+  },
+  doneCard: {
+    borderWidth: 2,
   },
   cardTitle: {
     fontSize: FontSize.button,

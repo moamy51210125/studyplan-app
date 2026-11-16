@@ -171,7 +171,7 @@ function DayCard({ day, labelOf }: { day: DayView; labelOf: (id: SubjectId) => s
                 style={[
                   styles.chip,
                   done
-                    ? { backgroundColor: theme.successBackground, color: theme.success, borderColor: theme.success }
+                    ? { backgroundColor: theme.successBackground, color: theme.text, borderColor: theme.success }
                     : { color: theme.text, borderColor: theme.border },
                 ]}>
                 {done ? `✓ ${name}` : name}
@@ -186,7 +186,7 @@ function DayCard({ day, labelOf }: { day: DayView; labelOf: (id: SubjectId) => s
                 accessibilityLabel={t.a11yItemDone(name)}
                 style={[
                   styles.chip,
-                  { backgroundColor: theme.successBackground, color: theme.success, borderColor: theme.success },
+                  { backgroundColor: theme.successBackground, color: theme.text, borderColor: theme.success },
                 ]}>
                 {`✓ ${name}`}
               </RubyText>

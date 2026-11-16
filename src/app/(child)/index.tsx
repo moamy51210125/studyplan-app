@@ -156,8 +156,13 @@ export default function TodayScreen() {
         )}
 
         {status.allDone && homeworkAllDone && (
-          <View style={[styles.banner, { backgroundColor: theme.successBackground }]}>
-            <RubyText style={[styles.bannerText, { color: theme.success }]}>{`🌟 ${t.allDone}`}</RubyText>
+          <View
+            style={[
+              styles.banner,
+              styles.doneBanner,
+              { backgroundColor: theme.successBackground, borderColor: theme.success },
+            ]}>
+            <RubyText style={[styles.bannerText, { color: theme.text }]}>{`🌟 ${t.allDone}`}</RubyText>
           </View>
         )}
 
@@ -298,6 +303,9 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     padding: Spacing.three,
     gap: Spacing.two,
+  },
+  doneBanner: {
+    borderWidth: 3,
   },
   bannerText: {
     fontSize: FontSize.button,
