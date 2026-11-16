@@ -245,14 +245,22 @@ export default function TodayScreen() {
           </>
         )}
 
-        <View style={styles.spacer} />
+        {/* 記録するボタン（カードのすぐ下） */}
         <BigButton
           variant="secondary"
-          label={t.otherSubjectButton}
+          label={`✏️ ${t.otherSubjectButton}`}
           onPress={() => setPickerOpen(true)}
         />
-        <BigButton variant="secondary" label={t.calendarButton} onPress={() => router.push('/calendar')} />
-        <BigButton variant="secondary" label={t.reviewButton} onPress={() => router.push('/review')} />
+
+        {/* ほかの画面へ移るボタンは、横にならべて区別する */}
+        <View style={[styles.navRow, { borderTopColor: theme.border }]}>
+          <View style={styles.navItem}>
+            <BigButton variant="secondary" label={`📅 ${t.calendarButton}`} onPress={() => router.push('/calendar')} />
+          </View>
+          <View style={styles.navItem}>
+            <BigButton variant="secondary" label={`📊 ${t.reviewButton}`} onPress={() => router.push('/review')} />
+          </View>
+        </View>
 
         {/* 保護者モードへの入口（暗証番号で守る） */}
         <View style={styles.parentEntry}>
@@ -332,8 +340,17 @@ const styles = StyleSheet.create({
     fontSize: FontSize.button,
     fontWeight: '700',
   },
-  spacer: {
-    height: Spacing.three,
+  navRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: Spacing.two,
+    marginTop: Spacing.three,
+    paddingTop: Spacing.four,
+    borderTopWidth: 1,
+  },
+  navItem: {
+    flexGrow: 1,
+    flexBasis: 140,
   },
   parentEntry: {
     marginTop: Spacing.five,
