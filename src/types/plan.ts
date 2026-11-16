@@ -19,6 +19,8 @@ export interface Subject {
   amount?: SubjectAmount;
   /** 自由に追加した教科の表示名（core / exam は文言ファイルから表示する） */
   label?: string;
+  /** 保護者が付ける一言（例：ドリル1ページ）。子ども画面のカードに出す。任意 */
+  note?: string;
 }
 
 /** 0 = 日曜日 … 6 = 土曜日 */

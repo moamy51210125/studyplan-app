@@ -49,6 +49,12 @@ export const PARENT_TEXT = {
   amountMore: '多め',
   amountA11y: (subject: string, amount: string) => `${subject}を${amount}にする`,
 
+  notesTitle: '教科ごとの一言（任意）',
+  notesNote:
+    'お子さまの画面で、教科名の下に出る一言です（例：ドリル1ページ、音読2回）。何をすればよいかが分かると、ひとりで取り組みやすくなります。空にすると出ません。お子さまが読めることば（ひらがな等）で書くと読みやすくなります。',
+  notesPlaceholder: '例：ドリル1ページ',
+  notesA11y: (subject: string) => `${subject}の一言`,
+
   slotsTitle: '曜日ごとの回数',
   slotsNote: '1日にいくつの教科を勉強するかです。変えると、明日以降の予定を作り直します。',
   slotsValue: (n: number) => `${n}回`,

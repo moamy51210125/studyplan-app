@@ -42,6 +42,13 @@ export default function TodayScreen() {
 
   const subjects = data?.settings.subjects;
   const grade = data?.grade;
+  const noteOf = useMemo(() => {
+    const byId = new Map((subjects ?? []).map((s) => [s.id, s.note]));
+    return (id: SubjectId) => {
+      const note = byId.get(id);
+      return note ? cleanLabel(note) : undefined;
+    };
+  }, [subjects]);
   const labelOf = useMemo(() => {
     const byId = new Map((subjects ?? []).map((s) => [s.id, s]));
     return (id: SubjectId) => {
@@ -205,6 +212,7 @@ export default function TodayScreen() {
             <SubjectCard
               key={slot.order}
               label={labelOf(slot.subjectId)}
+              note={noteOf(slot.subjectId)}
               done={done !== null}
               onDone={() => markDone(slot.subjectId)}
               onUndo={() => done && undo(done.index)}

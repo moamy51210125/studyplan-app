@@ -10,6 +10,7 @@ import { BackupSection } from '@/components/parent/backup-section';
 import { ExamsSection } from '@/components/parent/exams-section';
 import { GradeSection } from '@/components/parent/grade-section';
 import { HomeworkSection } from '@/components/parent/homework-section';
+import { NotesSection } from '@/components/parent/notes-section';
 import { RestDaysSection } from '@/components/parent/rest-days-section';
 import { Section } from '@/components/parent/section';
 import { SlotsEditor } from '@/components/parent/slots-editor';
@@ -165,6 +166,9 @@ export default function ParentScreen() {
         </Section>
 
         <AmountSection settings={data.settings} onChange={updateSettings} />
+
+        {/* 一言は予定に関係しないので、作り直さずに保存する */}
+        <NotesSection settings={data.settings} onChange={(settings) => commit({ ...data, settings })} />
 
         <Section title={PARENT_TEXT.slotsTitle} note={PARENT_TEXT.slotsNote}>
           <SlotsEditor

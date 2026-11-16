@@ -1,4 +1,4 @@
-import { StyleSheet, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 
 import { BigButton } from '@/components/big-button';
 import { RubyText } from '@/components/ruby-text';
@@ -11,6 +11,8 @@ import type { Mood } from '@/types/plan';
 interface SubjectCardProps {
   /** 教科名（ふりがなの印をふくんでもよい） */
   label: string;
+  /** 保護者が付けた一言（例：ドリル1ページ） */
+  note?: string;
   done: boolean;
   /** 未完了のときに「できた！」を押したとき（無ければボタンを出さない） */
   onDone?: () => void;
@@ -25,7 +27,16 @@ interface SubjectCardProps {
 const MOODS: Mood[] = ['good', 'ok', 'hard'];
 
 /** 教科1つ分のカード。できたかどうかは色だけでなく文字と ✓ でも示す */
-export function SubjectCard({ label, done, onDone, onUndo, mood, onMood, kind = 'subject' }: SubjectCardProps) {
+export function SubjectCard({
+  label,
+  note,
+  done,
+  onDone,
+  onUndo,
+  mood,
+  onMood,
+  kind = 'subject',
+}: SubjectCardProps) {
   const theme = useTheme();
   const t = useTodayText();
   const moodLabel = { good: t.moodGood, ok: t.moodOk, hard: t.moodHard };
@@ -47,11 +58,14 @@ export function SubjectCard({ label, done, onDone, onUndo, mood, onMood, kind = 
         },
       ]}>
       <View style={styles.topRow}>
-        <RubyText
-          style={[styles.label, { color: theme.text }]}
-          accessibilityLabel={done ? a11yState(spoken) : spoken}>
-          {label}
-        </RubyText>
+        <View style={styles.labelBox}>
+          <RubyText
+            style={[styles.label, { color: theme.text }]}
+            accessibilityLabel={done ? a11yState(spoken) : spoken}>
+            {label}
+          </RubyText>
+          {note ? <Text style={[styles.note, { color: theme.textSecondary }]}>{note}</Text> : null}
+        </View>
 
         {done ? (
           <View style={styles.doneRow}>
@@ -107,10 +121,16 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     gap: Spacing.three,
   },
+  labelBox: {
+    flexShrink: 1,
+    gap: Spacing.one,
+  },
   label: {
     fontSize: FontSize.heading,
     fontWeight: '700',
-    flexShrink: 1,
+  },
+  note: {
+    fontSize: FontSize.body,
   },
   doneRow: {
     flexDirection: 'row',

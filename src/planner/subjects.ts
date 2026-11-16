@@ -19,6 +19,18 @@ export function setSubjectAmount(
   return subjects.map((s) => (s.id === id ? { ...s, amount } : s));
 }
 
+/** 教科の一言を変えた新しい一覧を返す（空なら消す。予定には関係しない） */
+export function setSubjectNote(subjects: readonly Subject[], id: SubjectId, note: string): Subject[] {
+  const trimmed = note.trim();
+  return subjects.map((s) => {
+    if (s.id !== id) return s;
+    const next = { ...s };
+    if (trimmed === '') delete next.note;
+    else next.note = trimmed;
+    return next;
+  });
+}
+
 /** 教科のオン・オフを切り替えた新しい一覧を返す */
 export function setSubjectEnabled(
   subjects: readonly Subject[],
