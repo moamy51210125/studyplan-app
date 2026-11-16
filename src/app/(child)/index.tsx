@@ -1,6 +1,6 @@
 import { Redirect, router } from 'expo-router';
 import { useMemo, useState } from 'react';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { BigButton } from '@/components/big-button';
@@ -35,7 +35,7 @@ import type { Mood, SubjectId } from '@/types/plan';
 export default function TodayScreen() {
   const theme = useTheme();
   const t = useTodayText();
-  const { today, data, commit, saveError, missedReview, dismissMissedReview } = useStudyData();
+  const { today, data, commit, saveError, loadError, missedReview, dismissMissedReview } = useStudyData();
   const [pickerOpen, setPickerOpen] = useState(false);
   /** 「ちがう きょうかを やった」ときの組み直し案 */
   const [proposal, setProposal] = useState<ReplanResult | null>(null);
@@ -54,7 +54,11 @@ export default function TodayScreen() {
   if (!data) {
     return (
       <SafeAreaView style={[styles.center, { backgroundColor: theme.background }]}>
-        <Text style={[styles.body, { color: theme.text }]}>{t.loading}</Text>
+        <RubyText
+          accessibilityRole={loadError ? 'alert' : undefined}
+          style={[styles.body, styles.centerText, { color: theme.text }]}>
+          {loadError ? t.loadError : t.loading}
+        </RubyText>
       </SafeAreaView>
     );
   }
@@ -274,6 +278,10 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  centerText: {
+    padding: Spacing.four,
+    textAlign: 'center',
   },
   content: {
     padding: Spacing.four,

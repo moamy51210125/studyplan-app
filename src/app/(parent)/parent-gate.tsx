@@ -129,7 +129,14 @@ export default function ParentGateScreen() {
       />
       <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
         {isSetup && current === 'create' && (
-          <Text style={[styles.body, { color: theme.text }]}>{PARENT_TEXT.setupIntro}</Text>
+          <>
+            <Text style={[styles.body, { color: theme.text }]}>{PARENT_TEXT.setupIntro}</Text>
+            {data?.dataResetOn && (
+              <Text accessibilityRole="alert" style={[styles.body, { color: theme.text }]}>
+                {`⚠️ ${PARENT_TEXT.dataResetBody}`}
+              </Text>
+            )}
+          </>
         )}
         <Text style={[styles.body, { color: theme.text }]}>{prompt}</Text>
         {current === 'forgot' && (

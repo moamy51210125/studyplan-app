@@ -87,6 +87,17 @@ export default function ParentScreen() {
           </Text>
         )}
 
+        {data.dataResetOn && (
+          <Section title={`⚠️ ${PARENT_TEXT.dataResetTitle}`}>
+            <Text style={[styles.body, text]}>{PARENT_TEXT.dataResetBody}</Text>
+            <BigButton
+              variant="secondary"
+              label={PARENT_TEXT.dataResetDismiss}
+              onPress={() => commit({ ...data, dataResetOn: undefined })}
+            />
+          </Section>
+        )}
+
         {pending && (
           <Section title={PARENT_TEXT.approvalTitle}>
             {pendingStale ? (
@@ -175,6 +186,24 @@ export default function ParentScreen() {
 
         <BackupSection data={data} today={today} commit={commit} />
 
+        <Section title={PARENT_TEXT.missedTitle} note={PARENT_TEXT.missedNote}>
+          <View style={styles.choiceRow}>
+            {(['auto', 'ask'] as const).map((mode) => {
+              const selected = (data.missedReviewMode ?? 'auto') === mode;
+              return (
+                <View key={mode} style={styles.choice}>
+                  <BigButton
+                    variant={selected ? 'primary' : 'secondary'}
+                    selected={selected}
+                    label={mode === 'auto' ? PARENT_TEXT.missedAuto : PARENT_TEXT.missedAsk}
+                    onPress={() => commit({ ...data, missedReviewMode: mode })}
+                  />
+                </View>
+              );
+            })}
+          </View>
+        </Section>
+
         {data.parent && (
           <Section title={PARENT_TEXT.approvalSettingTitle} note={PARENT_TEXT.approvalSettingNote}>
             <View style={[styles.row, { borderColor: theme.border }]}>
@@ -236,6 +265,14 @@ const styles = StyleSheet.create({
   rowLabel: {
     fontSize: FontSize.body,
     flexShrink: 1,
+  },
+  choiceRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: Spacing.two,
+  },
+  choice: {
+    flexGrow: 1,
   },
   addRow: {
     flexDirection: 'row',

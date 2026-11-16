@@ -34,6 +34,14 @@ export interface AppData {
   appearance?: Appearance;
   /** 最後にバックアップを書き出した日 */
   lastBackupDate?: DateKey;
+  /**
+   * きのうまでに やらなかった予定の埋め合わせ（未設定は 'auto'。ユーザー決定 2026-11-16）
+   * - auto: 子どもに聞かず、そっと組み直す（毎朝「できなかった」と出して責めないため）
+   * - ask: その日はじめて開いたときに「こう かえても いい？」と聞く
+   */
+  missedReviewMode?: 'auto' | 'ask';
+  /** 保存データがこわれていて、初期データで始め直した日（保護者に知らせる。閉じたら消す） */
+  dataResetOn?: DateKey;
   /** 学校の宿題（月〜金に毎日出る。無ければ宿題わくは出さない） */
   homework?: HomeworkItem[];
   /** 宿題のチェック */
@@ -49,17 +57,39 @@ export interface ParentSettings {
 }
 
 const STORAGE_KEY = 'studyplan/app-data';
+/** 読めなかったデータの控え（上書きで消さないように、別の場所に残す） */
+export const BROKEN_KEY = 'studyplan/app-data-broken';
 
-/** 保存されたデータを読む。無い・読めないときは null */
-export async function loadAppData(): Promise<AppData | null> {
-  const raw = await AsyncStorage.getItem(STORAGE_KEY);
-  if (raw === null) return null;
+export type LoadResult =
+  | { kind: 'ok'; data: AppData }
+  /** はじめて使う（まだ何も保存されていない） */
+  | { kind: 'empty' }
+  /** 保存はあるが、こわれていて読めない（中身は BROKEN_KEY に控えた） */
+  | { kind: 'broken' };
+
+/** 文字列を読み、AppData として使えるか確かめる */
+export function parseStoredText(raw: string | null): { kind: 'ok'; data: AppData } | { kind: 'empty' | 'broken' } {
+  if (raw === null) return { kind: 'empty' };
   try {
     const data: unknown = JSON.parse(raw);
-    return isAppData(data) ? data : null;
+    return isAppData(data) ? { kind: 'ok', data } : { kind: 'broken' };
   } catch {
-    return null;
+    return { kind: 'broken' };
   }
+}
+
+/**
+ * 保存されたデータを読む。
+ * - こわれていたら、元の文字列を BROKEN_KEY に控えてから 'broken' を返す（黙って上書きしない）
+ * - 端末から読み出すこと自体に失敗したら、例外を投げる（呼び出し側は保存しないこと）
+ */
+export async function loadAppData(): Promise<LoadResult> {
+  const raw = await AsyncStorage.getItem(STORAGE_KEY);
+  const result = parseStoredText(raw);
+  if (result.kind === 'broken' && raw !== null) {
+    await AsyncStorage.setItem(BROKEN_KEY, raw);
+  }
+  return result;
 }
 
 export async function saveAppData(data: AppData): Promise<void> {

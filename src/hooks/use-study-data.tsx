@@ -34,6 +34,8 @@ interface StudyDataValue {
   /** 新しいデータを画面に反映し、端末に保存する */
   commit: (next: AppData) => void;
   saveError: boolean;
+  /** 端末から保存データを読み出せなかった（このときは何も保存しない） */
+  loadError: boolean;
   /** その日はじめて開いたときの、やらなかった予定の埋め合わせ案 */
   missedReview: ReplanResult | null;
   dismissMissedReview: () => void;
@@ -49,6 +51,7 @@ export function StudyDataProvider({ children }: { children: ReactNode }) {
   const today = useToday();
   const [data, setData] = useState<AppData | null>(null);
   const [saveError, setSaveError] = useState(false);
+  const [loadError, setLoadError] = useState(false);
   const [missedReview, setMissedReview] = useState<ReplanResult | null>(null);
 
   const commit = useCallback((next: AppData) => {
@@ -62,11 +65,24 @@ export function StudyDataProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     let cancelled = false;
     (async () => {
-      const loaded = (await loadAppData().catch(() => null)) ?? createEmptyData();
-      const month = ensureMonthPlan(loaded.settings, loaded.plan, loaded.plannedMonths, today);
-      const next: AppData = { ...loaded, ...month, lastOpenedDate: today };
+      let result;
+      try {
+        result = await loadAppData();
+      } catch {
+        // 読み出しに失敗しただけかもしれないので、上書きせずに知らせる
+        if (!cancelled) setLoadError(true);
+        return;
+      }
       if (cancelled) return;
-      commit(next);
+      setLoadError(false);
+      const loaded =
+        result.kind === 'ok'
+          ? result.data
+          : result.kind === 'broken'
+            ? { ...createEmptyData(), dataResetOn: today } // 元のデータは控えてある。保護者に知らせる
+            : createEmptyData();
+      const month = ensureMonthPlan(loaded.settings, loaded.plan, loaded.plannedMonths, today);
+      let next: AppData = { ...loaded, ...month, lastOpenedDate: today };
 
       // はじめて使う日は見直さない。その日2回目以降も見直さない
       const firstOpenToday = loaded.lastOpenedDate !== undefined && loaded.lastOpenedDate < today;
@@ -77,8 +93,12 @@ export function StudyDataProvider({ children }: { children: ReactNode }) {
           records: next.records,
           today,
         });
-        setMissedReview(review.changes.length > 0 ? review : null);
+        if (review.changes.length > 0) {
+          if (next.missedReviewMode === 'ask') setMissedReview(review);
+          else next = { ...next, plan: review.plan }; // そっと組み直す（月の計画を作るときと同じあつかい）
+        }
       }
+      commit(next);
     })();
     return () => {
       cancelled = true;
@@ -89,7 +109,7 @@ export function StudyDataProvider({ children }: { children: ReactNode }) {
 
   return (
     <StudyDataContext.Provider
-      value={{ today, data, commit, saveError, missedReview, dismissMissedReview }}>
+      value={{ today, data, commit, saveError, loadError, missedReview, dismissMissedReview }}>
       {children}
     </StudyDataContext.Provider>
   );
