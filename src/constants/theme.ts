@@ -2,7 +2,7 @@
  * アプリの色・文字・すき間。
  * 白（light）とダーク（dark）の2つ。どちらを使うかは保護者モードで選ぶ（はじめは白）。
  * どちらも青系の落ち着いた色にする（ユーザー決定 2026-11-16。以前の温かみのある茶・オレンジから変更）。
- * 「できた」は意味が伝わりやすいように緑のまま。
+ * 「できた」はオレンジ系（ユーザー決定 2026-11-16）。青の中で目立つようにする。
  * 文字と背景のコントラストは WCAG AA（4.5 以上）を計算で確認済み（.claude/rules/kid-friendly-ui.md）。
  */
 
@@ -23,9 +23,9 @@ export const Colors = {
     /** 主なボタンの青（白文字に対して 6.1） */
     tint: '#1F5FBF',
     onTint: '#FFFFFF',
-    /** 「できた！」の緑（うすい緑に対して 5.8） */
-    success: '#256B2A',
-    successBackground: '#E8F5E6',
+    /** 「できた！」のオレンジ（うすいオレンジに対して 5.2、背景に対して 5.6） */
+    success: '#A84A0A',
+    successBackground: '#FFF0E2',
   },
   dark: {
     /** 青白い文字（背景に対して 15.2） */
@@ -39,8 +39,9 @@ export const Colors = {
     /** やわらかい水色（上の文字はこい紺で 7.9） */
     tint: '#7FB2F0',
     onTint: '#0B1A2E',
-    success: '#93D69D',
-    successBackground: '#1A3324',
+    /** 「できた！」のやわらかいオレンジ（こげ茶に対して 8.1） */
+    success: '#FFB07A',
+    successBackground: '#3A2516',
   },
 } as const;
 
