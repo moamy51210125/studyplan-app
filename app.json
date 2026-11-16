@@ -7,14 +7,18 @@
     "icon": "./assets/images/icon.png",
     "scheme": "studyplanapp",
     "userInterfaceStyle": "automatic",
-    "ios": {},
+    "ios": {
+      "bundleIdentifier": "com.moamy.dekitacalendar"
+    },
     "android": {
       "adaptiveIcon": {
         "backgroundColor": "#FEF694",
         "foregroundImage": "./assets/images/android-icon-foreground.png",
         "backgroundImage": "./assets/images/android-icon-background.png"
       },
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "package": "com.moamy.dekitacalendar",
+      "versionCode": 1
     },
     "web": {
       "output": "server",

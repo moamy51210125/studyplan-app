@@ -20,6 +20,16 @@
   - `icon.png`（1024）、Android の `android-icon-foreground.png`（丸く切られても欠けないよう中央に小さめ）・`android-icon-background.png`（黄色 `#FEF694`）、起動画面 `splash-icon.png`（背景も同じ黄色）は、元の画像から作った
   - Android のモノクロアイコン（テーマアイコン）は未作成のため設定から外した
 
+## 配布（ユーザー決定 2026-11-16）
+
+- **今は家族だけ（Android のみ）**で使い、あとからストアに出せるようにしておく
+- アプリの ID：`com.moamy.dekitacalendar`（Android `package`・iOS `bundleIdentifier`）。**変えると別アプリ扱いになり、端末内の記録を引きつげないので変えない**
+- `eas.json`：`preview`＝家族用の APK（直接インストール）、`production`＝ストア用（AAB）
+- 組み立ては EAS Build（Expo のサーバー。外部サービスなので、実行前に必ずユーザーへ確認する）。ログインやビルドのコマンドは、ユーザーが自分のターミナルで実行する
+- 署名の鍵（keystore）は EAS に保管する。ストアに出すときも同じ鍵が必要なので消さない
+- 新しい版を配るときは `android.versionCode` を1つ上げる（`version` も必要に応じて上げる）
+- Expo Go の中の記録は、組み立てたアプリには引きつがれない（移すときはバックアップの書き出し→読み込み）
+
 ## 機能
 
 ### 確定している要望（2026-11-14 ユーザーより）
