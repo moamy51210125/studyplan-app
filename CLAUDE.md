@@ -1,4 +1,4 @@
-# CLAUDE.md — 学習計画管理アプリ（studyplan-app）
+# CLAUDE.md — 学習計画管理アプリ「できたカレンダー」（studyplan-app）
 
 このフォルダで作業する Claude Code 向けのプロジェクト概要です。
 グローバルの `~/.claude/CLAUDE.md`（セキュリティルール）も有効で、**そちらが優先**されます。
@@ -12,6 +12,13 @@
 - **主な利用者**: 小学生（1〜6年生、およそ6〜12歳）
 - **副次的な利用者**: 保護者（見守り・設定・確認）
 - **現在の状態**: 立ち上げ前（ソースコードなし）
+
+## アプリの名前とアイコン（ユーザー決定 2026-11-16）
+
+- 名前：**できたカレンダー**（`app.json` の `name`。`slug` は studyplan-app のまま）
+- アイコン：黄色の背景に、白いカレンダーと赤い花まる（ユーザー提供の絵。元の画像は `assets/images/icon-source.png`）
+  - `icon.png`（1024）、Android の `android-icon-foreground.png`（丸く切られても欠けないよう中央に小さめ）・`android-icon-background.png`（黄色 `#FEF694`）、起動画面 `splash-icon.png`（背景も同じ黄色）は、元の画像から作った
+  - Android のモノクロアイコン（テーマアイコン）は未作成のため設定から外した
 
 ## 機能
 
