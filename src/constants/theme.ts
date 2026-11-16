@@ -1,7 +1,8 @@
 /**
  * アプリの色・文字・すき間。
  * 白（light）とダーク（dark）の2つ。どちらを使うかは保護者モードで選ぶ（はじめは白）。
- * どちらも温かみのある色にする（ユーザー決定 2026-11-15）。
+ * どちらも青系の落ち着いた色にする（ユーザー決定 2026-11-16。以前の温かみのある茶・オレンジから変更）。
+ * 「できた」は意味が伝わりやすいように緑のまま。
  * 文字と背景のコントラストは WCAG AA（4.5 以上）を計算で確認済み（.claude/rules/kid-friendly-ui.md）。
  */
 
@@ -9,37 +10,37 @@ import { Platform } from 'react-native';
 
 export const Colors = {
   light: {
-    /** こげ茶（背景に対して 13.2） */
-    text: '#3D2B1F',
-    /** うすい茶（背景に対して 6.5、カードに対して 6.0） */
-    textSecondary: '#75573F',
-    /** ほんのりクリームがかった白 */
-    background: '#FFFDF8',
-    /** カードのクリーム色 */
-    backgroundElement: '#FFF4E3',
-    backgroundSelected: '#FFE8C7',
-    border: '#E6C9A0',
-    /** 主なボタンのオレンジ（白文字に対して 5.1） */
-    tint: '#B84E17',
+    /** こい紺（背景に対して 13.9） */
+    text: '#1B2A41',
+    /** 青みのある灰色（背景に対して 6.5、カードに対して 6.0） */
+    textSecondary: '#4A5D78',
+    /** ほんのり青みがかった白 */
+    background: '#F8FBFF',
+    /** カードのうすい水色 */
+    backgroundElement: '#EAF2FC',
+    backgroundSelected: '#D6E6FA',
+    border: '#B5CDEB',
+    /** 主なボタンの青（白文字に対して 6.1） */
+    tint: '#1F5FBF',
     onTint: '#FFFFFF',
-    /** 「できた！」の緑（うすい緑に対して 5.9） */
+    /** 「できた！」の緑（うすい緑に対して 5.8） */
     success: '#256B2A',
-    successBackground: '#EAF6E4',
+    successBackground: '#E8F5E6',
   },
   dark: {
-    /** クリーム色の文字（背景に対して 14.8） */
-    text: '#F6EBDD',
-    textSecondary: '#CDB7A0',
-    /** 真っ黒ではなく、温かみのある濃い茶色 */
-    background: '#1F1914',
-    backgroundElement: '#2C231C',
-    backgroundSelected: '#3B2F26',
-    border: '#5E4A39',
-    /** やわらかいオレンジ（上の文字は濃い茶色で 8.6） */
-    tint: '#F2A766',
-    onTint: '#2A1608',
+    /** 青白い文字（背景に対して 15.2） */
+    text: '#E8F0FB',
+    textSecondary: '#AFC0D8',
+    /** 真っ黒ではなく、こい紺 */
+    background: '#121A26',
+    backgroundElement: '#1C2636',
+    backgroundSelected: '#26334A',
+    border: '#3D5070',
+    /** やわらかい水色（上の文字はこい紺で 7.9） */
+    tint: '#7FB2F0',
+    onTint: '#0B1A2E',
     success: '#93D69D',
-    successBackground: '#1E3322',
+    successBackground: '#1A3324',
   },
 } as const;
 
