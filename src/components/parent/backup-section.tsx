@@ -8,7 +8,7 @@ import { BigButton } from '@/components/big-button';
 import { parentStyles, Section } from '@/components/parent/section';
 import { Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
-import { ensureMonthPlan } from '@/planner';
+import { useStudyData } from '@/hooks/use-study-data';
 import type { AppData } from '@/storage/app-data';
 import { backupFileName, createBackupText, parseBackupText } from '@/storage/backup';
 import { formatDateParent, PARENT_TEXT } from '@/strings/parent';
@@ -51,6 +51,7 @@ async function readPickedFile(file: File): Promise<string> {
  */
 export function BackupSection({ data, today, commit }: Props) {
   const theme = useTheme();
+  const { family, commitFamily, switchChild } = useStudyData();
   const [message, setMessage] = useState('');
   const text = { color: theme.text };
 
@@ -63,7 +64,9 @@ export function BackupSection({ data, today, commit }: Props) {
       }
       const file = new File(Paths.cache, backupFileName(today));
       file.create({ overwrite: true });
-      await file.write(createBackupText(data, today));
+      if (!family) return;
+      // きょうだい全員分を書き出す
+      await file.write(createBackupText(family, today));
       await shareAsync(file.uri, {
         mimeType: 'application/json',
         UTI: 'public.json',
@@ -97,9 +100,9 @@ export function BackupSection({ data, today, commit }: Props) {
             text: PARENT_TEXT.backupConfirmOk,
             style: 'destructive',
             onPress: () => {
-              const restored = result.data;
-              const month = ensureMonthPlan(restored.settings, restored.plan, restored.plannedMonths, today);
-              commit({ ...restored, ...month, lastOpenedDate: today });
+              // 家族全体を置きかえ、今の子どもの今月の計画などを準備する
+              commitFamily(result.family);
+              switchChild(result.family.activeChildId);
               setMessage(PARENT_TEXT.backupRestored);
             },
           },

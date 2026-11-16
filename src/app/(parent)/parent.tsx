@@ -7,6 +7,7 @@ import { BigButton } from '@/components/big-button';
 import { AmountSection } from '@/components/parent/amount-section';
 import { AppearanceSection } from '@/components/parent/appearance-section';
 import { BackupSection } from '@/components/parent/backup-section';
+import { ChildrenSection } from '@/components/parent/children-section';
 import { ExamsSection } from '@/components/parent/exams-section';
 import { GradeSection } from '@/components/parent/grade-section';
 import { HomeworkSection } from '@/components/parent/homework-section';
@@ -26,6 +27,7 @@ import {
   isApprovalStale,
   setSubjectEnabled,
 } from '@/planner';
+import { childNameForParent } from '@/strings/children';
 import { formatDateParent, PARENT_TEXT } from '@/strings/parent';
 import { subjectLabelForParent } from '@/strings/subjects';
 import type { PlanSettings, SubjectId } from '@/types/plan';
@@ -36,7 +38,7 @@ const MAX_SUBJECT_NAME = 12;
 /** 保護者モード：確認待ちの変更、宿題、教科、曜日ごとの回数、お休みの日、試験日、学年、保護者確認の設定 */
 export default function ParentScreen() {
   const theme = useTheme();
-  const { today, data, commit } = useStudyData();
+  const { today, data, commit, family } = useStudyData();
   const [notice, setNotice] = useState('');
   const [newSubject, setNewSubject] = useState('');
 
@@ -98,6 +100,20 @@ export default function ParentScreen() {
               onPress={() => commit({ ...data, dataResetOn: undefined })}
             />
           </Section>
+        )}
+
+        <ChildrenSection />
+
+        {/* きょうだいがいるときは、どの子の設定かを示す（ここから下は、その子だけに反映） */}
+        {family && family.children.length > 1 && (
+          <Text accessibilityRole="header" style={[styles.forChild, { color: theme.text, borderColor: theme.tint }]}>
+            {PARENT_TEXT.settingsFor(
+              childNameForParent(
+                family.children.find((c) => c.id === family.activeChildId) ?? family.children[0],
+                Math.max(0, family.children.findIndex((c) => c.id === family.activeChildId)),
+              ),
+            )}
+          </Text>
         )}
 
         {pending && (
@@ -259,6 +275,12 @@ const styles = StyleSheet.create({
   body: {
     fontSize: 16,
     lineHeight: 24,
+  },
+  forChild: {
+    fontSize: FontSize.body,
+    fontWeight: '700',
+    borderLeftWidth: 4,
+    paddingLeft: Spacing.two,
   },
   notice: {
     fontSize: 16,

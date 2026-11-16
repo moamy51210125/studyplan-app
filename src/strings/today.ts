@@ -69,6 +69,11 @@ const MARKED = {
   homeworkCheck: 'やった！',
   planTitle: 'べん{強|きょう|2}の よてい',
 
+  // きょうだい
+  whoTitle: 'だれが つかう？',
+  whoChange: 'かえる',
+  childFallback: (n: number) => `${n}にんめ`,
+
   // スタンプとごほうび
   stampTitle: '⭐ スタンプ',
   stampCount: (n: number, goal: number) => `${n} / ${goal}こ`,
@@ -155,6 +160,8 @@ const MARKED = {
   a11yStamp: (n: number, goal: number, label: string) =>
     n >= goal ? `スタンプ ${n}こ。たまったよ。ごほうびは ${label}` : `スタンプ ${goal}この うち ${n}こ。ごほうびは ${label}`,
   a11yOtherSubject: 'ちがう きょうかを やった',
+  a11yWho: (name: string) => `${name}`,
+  a11yWhoChange: (name: string) => `いまは ${name}。つかう ひとを かえる`,
   a11yCalendar: 'よていを みる',
   a11yReview: 'ふりかえりを みる',
   a11yHomeworkState: (name: string) => `しゅくだい、${name}、やりました`,

@@ -120,6 +120,26 @@ export const PARENT_TEXT = {
   examNone: '登録されている試験はありません。',
   examNeedAll: '教科・級・試験日をすべて入力してください。',
 
+  childrenTitle: 'お子さま（きょうだい）',
+  childrenNote:
+    'きょうだいで使うときは、お子さまを追加してください。予定・記録・宿題・スタンプなどは、お子さまごとに分かれます（暗証番号と画面の色は共通）。保存するのはニックネームだけです。本名でなくてかまいません。きょうだいがいると、アプリを開いたときに「だれが つかう？」が出て、お子さまが自分で切りかえられます。',
+  childNicknameA11y: (name: string) => `${name}のニックネーム`,
+  childNicknamePlaceholder: 'ニックネーム',
+  childAddLabel: 'お子さまを追加',
+  childAddPlaceholder: '例：たろう、はなちゃん',
+  childAdd: '追加',
+  childSelect: 'この子の設定にする',
+  childCurrent: '設定中',
+  childRemove: '削除',
+  childRemoveA11y: (name: string) => `${name}を削除`,
+  childRemoveTitle: (name: string) => `${name}を削除しますか？`,
+  childRemoveBody: 'このお子さまの予定・記録・宿題・スタンプがすべて消えます。この操作は取り消せません（バックアップがあれば戻せます）。',
+  childRemoveOk: '削除する',
+  childRemoveCancel: 'やめる',
+  childMax: (n: number) => `お子さまは${n}人まで登録できます。`,
+  settingsFor: (name: string) => `${name}の設定です。下の項目は、このお子さまだけに反映されます。`,
+  childFallback: (n: number) => `${n}人目`,
+
   homeworkTitle: '学校の宿題',
   homeworkNote:
     'お子さまと相談して、毎日の宿題を登録してください。月曜〜金曜に、お子さまの画面のいちばん上に出て、チェックできます（お休みの日には出ません）。計画の回数やふりかえりには入りません。お子さまが読めることば（ひらがな等）で書くと読みやすくなります。',
@@ -172,7 +192,7 @@ export const PARENT_TEXT = {
   backupImportFailed: 'ファイルを読み込めませんでした。もう一度お試しください。',
   backupConfirmTitle: 'データを読み込みますか？',
   backupConfirmBody: (date: string) =>
-    `${date}に書き出したデータで、今の記録と設定をすべて置きかえます。暗証番号も、書き出したときのものに戻ります。この操作は取り消せません。`,
+    `${date}に書き出したデータで、今の記録と設定をすべて（きょうだい全員分）置きかえます。暗証番号も、書き出したときのものに戻ります。この操作は取り消せません。`,
   backupConfirmOk: '読み込む',
   backupConfirmCancel: 'やめる',
   backupNotBackup: 'このファイルは、このアプリのバックアップではないか、こわれています。',

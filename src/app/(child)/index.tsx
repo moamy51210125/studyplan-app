@@ -31,6 +31,7 @@ import {
   todayStatus,
   upcomingExams,
 } from '@/planner';
+import { childNameForChild } from '@/strings/children';
 import { cleanLabel, examGradeForChild, subjectLabelForChild } from '@/strings/subjects';
 import { useTodayText } from '@/hooks/use-today-text';
 import type { AppData } from '@/storage/app-data';
@@ -40,8 +41,17 @@ import type { Mood, SubjectId } from '@/types/plan';
 export default function TodayScreen() {
   const theme = useTheme();
   const t = useTodayText();
-  const { today, data, commit: commitRaw, saveError, loadError, missedReview, dismissMissedReview } =
-    useStudyData();
+  const {
+    today,
+    data,
+    commit: commitRaw,
+    family,
+    needsChooser,
+    saveError,
+    loadError,
+    missedReview,
+    dismissMissedReview,
+  } = useStudyData();
   const [pickerOpen, setPickerOpen] = useState(false);
   /** 「ちがう きょうかを やった」ときの組み直し案 */
   const [proposal, setProposal] = useState<ReplanResult | null>(null);
@@ -88,6 +98,13 @@ export default function TodayScreen() {
     const earned = isDayComplete(next.plan, next.records, homeworkOf(next), next.homeworkChecks ?? [], today);
     commitRaw({ ...next, stamps: syncTodayStamp(next.stamps ?? [], today, earned) });
   };
+
+  // きょうだいがいるときは、アプリを開いたら「だれが つかう？」を出す
+  if (needsChooser) return <Redirect href="/who" />;
+
+  const siblings = family && family.children.length > 1 ? family.children : null;
+  const myIndex = siblings ? Math.max(0, siblings.findIndex((c) => c.id === family?.activeChildId)) : 0;
+  const myName = siblings ? childNameForChild(siblings[myIndex], myIndex, grade) : '';
 
   const status = todayStatus(data.plan, data.records, today);
   const next = status.items.length === 0 ? nextStudyDay(data.plan, today) : [];
@@ -150,6 +167,17 @@ export default function TodayScreen() {
   return (
     <SafeAreaView style={[styles.safeArea, { backgroundColor: theme.background }]}>
       <ScrollView contentContainerStyle={styles.content}>
+        {siblings && (
+          <View style={styles.whoRow}>
+            <RubyText style={[styles.whoName, { color: theme.text }]}>{`👤 ${myName}`}</RubyText>
+            <BigButton
+              variant="secondary"
+              label={t.whoChange}
+              accessibilityLabel={t.a11yWhoChange(myName)}
+              onPress={() => router.push('/who')}
+            />
+          </View>
+        )}
         <RubyText style={[styles.date, { color: theme.textSecondary }]}>{t.dateLong(today)}</RubyText>
         <RubyText accessibilityRole="header" style={[styles.title, { color: theme.text }]}>
           {t.title}
@@ -336,6 +364,18 @@ const styles = StyleSheet.create({
     width: '100%',
     maxWidth: MaxContentWidth,
     alignSelf: 'center',
+  },
+  whoRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: Spacing.two,
+  },
+  whoName: {
+    fontSize: FontSize.button,
+    fontWeight: '700',
+    flexShrink: 1,
   },
   date: {
     fontSize: FontSize.body,
