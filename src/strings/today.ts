@@ -69,6 +69,15 @@ const MARKED = {
   homeworkCheck: 'やった！',
   planTitle: 'べん{強|きょう|2}の よてい',
 
+  // スタンプとごほうび
+  stampTitle: '⭐ スタンプ',
+  stampCount: (n: number, goal: number) => `${n} / ${goal}こ`,
+  stampLeft: (n: number, label: string) => `あと ${n}こで 🎁 ${label}`,
+  stampReached: (label: string) => `スタンプが たまったよ！ 🎁 ${label}。おうちの {人|ひと|1}に みせてね`,
+  stampHint: '{今日|きょう|2}の よていと しゅくだいが ぜんぶ できたら、スタンプが 1こ もらえるよ',
+  stampGot: 'スタンプ ゲット！',
+  rewardFallback: 'ごほうび',
+
   // きょうの気持ち
   moodQuestion: 'どうだった？',
   moodGood: '😊 よかった',
@@ -143,6 +152,11 @@ const MARKED = {
           : `${date}、よてい ${planned}こ`,
   a11yItemDone: (name: string) => `${name}、できた`,
   a11yHomeworkDone: (name: string) => `しゅくだい、${name}、やった`,
+  a11yStamp: (n: number, goal: number, label: string) =>
+    n >= goal ? `スタンプ ${n}こ。たまったよ。ごほうびは ${label}` : `スタンプ ${goal}この うち ${n}こ。ごほうびは ${label}`,
+  a11yOtherSubject: 'ちがう きょうかを やった',
+  a11yCalendar: 'よていを みる',
+  a11yReview: 'ふりかえりを みる',
   a11yHomeworkState: (name: string) => `しゅくだい、${name}、やりました`,
   a11yHomeworkUndo: (name: string) => `しゅくだい、${name}の やったを とりけす`,
 };

@@ -6,6 +6,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { BigButton } from '@/components/big-button';
 import { ReplanConfirmModal } from '@/components/replan-confirm-modal';
 import { RubyText } from '@/components/ruby-text';
+import { StampCard } from '@/components/stamp-card';
 import { SubjectCard } from '@/components/subject-card';
 import { SubjectPickerModal } from '@/components/subject-picker-modal';
 import { FontSize, MaxContentWidth, Spacing } from '@/constants/theme';
@@ -17,25 +18,30 @@ import {
   enabledSubjectIds,
   homeworkForDay,
   isApprovalStale,
+  isDayComplete,
   isHomeworkDone,
   nextStudyDay,
   removeRecordAt,
   replan,
   type ReplanResult,
+  rewardProgress,
   setHomeworkDone,
   setRecordMood,
+  syncTodayStamp,
   todayStatus,
   upcomingExams,
 } from '@/planner';
 import { cleanLabel, examGradeForChild, subjectLabelForChild } from '@/strings/subjects';
 import { useTodayText } from '@/hooks/use-today-text';
+import type { AppData } from '@/storage/app-data';
 import type { Mood, SubjectId } from '@/types/plan';
 
 /** 子ども用：きょうの やること */
 export default function TodayScreen() {
   const theme = useTheme();
   const t = useTodayText();
-  const { today, data, commit, saveError, loadError, missedReview, dismissMissedReview } = useStudyData();
+  const { today, data, commit: commitRaw, saveError, loadError, missedReview, dismissMissedReview } =
+    useStudyData();
   const [pickerOpen, setPickerOpen] = useState(false);
   /** 「ちがう きょうかを やった」ときの組み直し案 */
   const [proposal, setProposal] = useState<ReplanResult | null>(null);
@@ -75,20 +81,25 @@ export default function TodayScreen() {
     return <Redirect href={{ pathname: '/parent-gate', params: { setup: '1' } }} />;
   }
 
+  /** その日の予定と宿題がぜんぶできたかを見て、スタンプを付け外ししてから保存する */
+  const homeworkOf = (d: AppData) =>
+    homeworkForDay(d.homework ?? [], today, d.settings.restDays, d.schoolBreaks ?? []);
+  const commit = (next: AppData) => {
+    const earned = isDayComplete(next.plan, next.records, homeworkOf(next), next.homeworkChecks ?? [], today);
+    commitRaw({ ...next, stamps: syncTodayStamp(next.stamps ?? [], today, earned) });
+  };
+
   const status = todayStatus(data.plan, data.records, today);
   const next = status.items.length === 0 ? nextStudyDay(data.plan, today) : [];
   // 学校の宿題（月〜金。計画とは別に、いちばん上に出す）
   const checks = data.homeworkChecks ?? [];
-  const homework = homeworkForDay(
-    data.homework ?? [],
-    today,
-    data.settings.restDays,
-    data.schoolBreaks ?? [],
-  ).map((h) => ({
+  const homework = homeworkOf(data).map((h) => ({
     ...h,
     done: isHomeworkDone(checks, today, h.id),
   }));
-  const homeworkAllDone = homework.every((h) => h.done);
+  const dayComplete = isDayComplete(data.plan, data.records, homework, checks, today);
+  const progress = data.reward ? rewardProgress((data.stamps ?? []).length, data.reward) : null;
+  const rewardLabel = data.reward ? cleanLabel(data.reward.label) || t.rewardFallback : '';
   const checkHomework = (id: string, done: boolean) =>
     commit({ ...data, homeworkChecks: setHomeworkDone(checks, today, id, done) });
 
@@ -171,16 +182,20 @@ export default function TodayScreen() {
           </View>
         )}
 
-        {status.allDone && homeworkAllDone && (
+        {dayComplete && (
           <View
             style={[
               styles.banner,
               styles.doneBanner,
               { backgroundColor: theme.successBackground, borderColor: theme.success },
             ]}>
-            <RubyText style={[styles.bannerText, { color: theme.text }]}>{`🌟 ${t.allDone}`}</RubyText>
+            <RubyText style={[styles.bannerText, { color: theme.text }]}>
+              {progress ? `🌟 ${t.allDone} ⭐ ${t.stampGot}` : `🌟 ${t.allDone}`}
+            </RubyText>
           </View>
         )}
+
+        {progress && <StampCard progress={progress} label={rewardLabel} />}
 
         {homework.length > 0 && (
           <>
@@ -249,16 +264,27 @@ export default function TodayScreen() {
         <BigButton
           variant="secondary"
           label={`✏️ ${t.otherSubjectButton}`}
+          accessibilityLabel={t.a11yOtherSubject}
           onPress={() => setPickerOpen(true)}
         />
 
         {/* ほかの画面へ移るボタンは、横にならべて区別する */}
         <View style={[styles.navRow, { borderTopColor: theme.border }]}>
           <View style={styles.navItem}>
-            <BigButton variant="secondary" label={`📅 ${t.calendarButton}`} onPress={() => router.push('/calendar')} />
+            <BigButton
+              variant="secondary"
+              label={`📅 ${t.calendarButton}`}
+              accessibilityLabel={t.a11yCalendar}
+              onPress={() => router.push('/calendar')}
+            />
           </View>
           <View style={styles.navItem}>
-            <BigButton variant="secondary" label={`📊 ${t.reviewButton}`} onPress={() => router.push('/review')} />
+            <BigButton
+              variant="secondary"
+              label={`📊 ${t.reviewButton}`}
+              accessibilityLabel={t.a11yReview}
+              onPress={() => router.push('/review')}
+            />
           </View>
         </View>
 

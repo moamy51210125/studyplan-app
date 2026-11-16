@@ -137,6 +137,22 @@ export const PARENT_TEXT = {
   breakRemoveA11y: (from: string, to: string) => `${from}〜${to}の学校のお休みを削除`,
   breakMark: '休',
 
+  rewardTitle: 'スタンプとごほうび（任意）',
+  rewardNote:
+    'その日の勉強の予定と宿題がぜんぶできたら、スタンプが1つたまります。「スタンプ○個で□□」というごほうびを、お子さまと相談して決められます。オフのときは、お子さまの画面にスタンプを出しません。',
+  rewardSwitch: 'スタンプとごほうびを使う',
+  rewardDefaultLabel: 'すきな おやつ',
+  rewardGoalLabel: 'スタンプいくつで、ごほうびにするか',
+  rewardGoalValue: (n: number) => `${n}個`,
+  rewardGoalRange: (min: number, max: number) => `${min}〜${max}個で決められます。`,
+  rewardGoalDecrease: 'スタンプの数を減らす',
+  rewardGoalIncrease: 'スタンプの数を増やす',
+  rewardLabelLabel: 'ごほうびの中身（お子さまの画面に出ます）',
+  rewardLabelPlaceholder: '例：すきな おやつ、こうえんに いく',
+  rewardProgress: (n: number, goal: number) => `今のスタンプ：${n} / ${goal}個`,
+  rewardReached: 'スタンプがたまりました。ごほうびを渡したら、下のボタンを押してください。',
+  rewardGive: 'ごほうびを渡した（スタンプを数え直す）',
+
   gradeTitle: '学年',
   gradeNote:
     '学年に合わせて、お子さまの画面の教科名を漢字で表示するかを切り替えます（未設定のときはひらがな）。',

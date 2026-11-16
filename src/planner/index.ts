@@ -8,5 +8,6 @@ export * from './exams';
 export * from './homework';
 export * from './replan';
 export * from './review';
+export * from './stamps';
 export * from './subjects';
 export * from './today';

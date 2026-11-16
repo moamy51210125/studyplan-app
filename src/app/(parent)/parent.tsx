@@ -12,6 +12,7 @@ import { GradeSection } from '@/components/parent/grade-section';
 import { HomeworkSection } from '@/components/parent/homework-section';
 import { NotesSection } from '@/components/parent/notes-section';
 import { RestDaysSection } from '@/components/parent/rest-days-section';
+import { RewardSection } from '@/components/parent/reward-section';
 import { Section } from '@/components/parent/section';
 import { SlotsEditor } from '@/components/parent/slots-editor';
 import { FontSize, MaxContentWidth, MinTouchSize, Spacing } from '@/constants/theme';
@@ -183,6 +184,12 @@ export default function ParentScreen() {
         <RestDaysSection settings={data.settings} today={today} onChange={updateSettings} />
 
         <ExamsSection settings={data.settings} today={today} onChange={updateSettings} />
+
+        <RewardSection
+          reward={data.reward}
+          stampCount={(data.stamps ?? []).length}
+          onChange={(reward) => commit({ ...data, reward })}
+        />
 
         {/* 学年と画面の色は表示だけに使うので、予定は作り直さない */}
         <GradeSection grade={data.grade} onChange={(grade) => commit({ ...data, grade })} />

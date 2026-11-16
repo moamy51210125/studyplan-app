@@ -2,6 +2,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import type { Appearance } from '@/constants/theme';
 import type { PendingApproval } from '@/planner/approval';
+import type { Reward } from '@/planner/stamps';
 import type {
   DateKey,
   DateRange,
@@ -49,6 +50,10 @@ export interface AppData {
   homeworkChecks?: HomeworkCheck[];
   /** 学校のお休み（夏休みなど）。宿題を出さない（勉強の予定はそのまま） */
   schoolBreaks?: DateRange[];
+  /** スタンプをもらった日（その日の予定と宿題がぜんぶできた日） */
+  stamps?: DateKey[];
+  /** ごほうび（無ければスタンプを子ども画面に出さない。任意） */
+  reward?: Reward;
 }
 
 export interface ParentSettings {
